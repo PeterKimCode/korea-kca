@@ -1,7 +1,7 @@
 const KAKAO_URL = "https://open.kakao.com/o/pfJrLjVh";
 const CERTIFICATE_CHECK_URL = "https://www.kcqa.kr/";
 
-const HERO_SLIDES = Array.from({ length: 15 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.png`);
+const HERO_SLIDES = Array.from({ length: 8 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.webp`);
 
 const icons = {
   search:
@@ -170,18 +170,60 @@ function initHeroSlider() {
     <div class="hero-slide-caption">
       <span>GTCC Programs</span>
       <strong>전문 자격 과정 이미지</strong>
-      <small>자동 슬라이드</small>
+      <small>자동 · 수동 슬라이드</small>
+    </div>
+    <div class="hero-slide-controls" aria-label="슬라이드 조작">
+      <button type="button" class="hero-slide-control is-prev" data-slide-prev aria-label="이전 이미지">${icons.arrow}</button>
+      <div class="hero-slide-dots">
+        ${HERO_SLIDES.map((_, index) => `<button type="button" class="${index === 0 ? "is-active" : ""}" data-slide-dot="${index}" aria-label="${index + 1}번 이미지 보기"></button>`).join("")}
+      </div>
+      <button type="button" class="hero-slide-control" data-slide-next aria-label="다음 이미지">${icons.arrow}</button>
     </div>
     <div class="hero-slide-progress"><span></span></div>
   `;
-  if (prefersReducedMotion) return;
   const slides = slider.querySelectorAll(".hero-slide");
+  const dots = slider.querySelectorAll("[data-slide-dot]");
+  const progress = slider.querySelector(".hero-slide-progress span");
   let active = 0;
-  window.setInterval(() => {
+  let timer = null;
+
+  function restartProgress() {
+    if (!progress) return;
+    progress.style.animation = "none";
+    progress.offsetHeight;
+    progress.style.animation = "";
+  }
+
+  function showSlide(next) {
     slides[active].classList.remove("is-active");
-    active = (active + 1) % slides.length;
+    dots[active].classList.remove("is-active");
+    active = (next + slides.length) % slides.length;
     slides[active].classList.add("is-active");
-  }, 3600);
+    dots[active].classList.add("is-active");
+    restartProgress();
+  }
+
+  function startAuto() {
+    if (prefersReducedMotion) return;
+    window.clearInterval(timer);
+    timer = window.setInterval(() => showSlide(active + 1), 3600);
+  }
+
+  slider.querySelector("[data-slide-prev]").addEventListener("click", () => {
+    showSlide(active - 1);
+    startAuto();
+  });
+  slider.querySelector("[data-slide-next]").addEventListener("click", () => {
+    showSlide(active + 1);
+    startAuto();
+  });
+  dots.forEach((dot) => {
+    dot.addEventListener("click", () => {
+      showSlide(Number(dot.dataset.slideDot));
+      startAuto();
+    });
+  });
+  startAuto();
 }
 
 function slugify(value) {

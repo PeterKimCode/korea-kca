@@ -481,8 +481,8 @@ function renderCertificates() {
       </div>
       <aside class="contact-panel">
         ${icon("certificate")}
-        <h2>발급 전 확인이 필요하신가요?</h2>
-        <p>수료 기준, 이름 정정, 배송지 변경은 카카오톡 상담으로 빠르게 확인할 수 있습니다.</p>
+        <h2>발급된 모든자격증을 인터넷으로 확인하실수 있습니다.</h2>
+        <p>자격증확인에 들어가셔서 본인의 이름과 전화번호를 치시면 발급받은 자격증을 확인하실수 있으며 재발급도 받으실수 있습니다.</p>
         <div class="contact-actions">
           <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
           <a class="ghost-btn" href="${CERTIFICATE_CHECK_URL}" target="_blank" rel="noopener">${icon("shield")} 자격증 확인</a>
@@ -534,7 +534,7 @@ function renderNotice() {
     <section class="notice-board-shell">
       <aside class="customer-sidebar">
         <h1>고객센터</h1>
-        <p>안녕하세요.<br />GTCC평생교육원입니다.</p>
+        <p>안녕하세요.<br />GTCC대학교 평생교육원입니다.</p>
         <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
         <nav>
           <a class="is-active" href="page.html?page=notice">${icon("check")} 공지사항</a>
@@ -569,7 +569,7 @@ function renderNoticeArticle(page) {
   const number = Number(page.replace("notice-", ""));
   const row = noticeRows.find(([id]) => id === number) || noticeRows[0];
   return `
-    ${pageHero("공지사항", "Notice", "GTCC평생교육원의 과정 및 운영 안내입니다.")}
+    ${pageHero("공지사항", "Notice", "GTCC대학교 평생교육원의 과정 및 운영 안내입니다.")}
     <section class="article-shell">
       <h2>${row[1]}</h2>
       <dl><div><dt>작성자</dt><dd>${row[2]}</dd></div><div><dt>작성일</dt><dd>${row[3]}</dd></div></dl>
@@ -597,32 +597,32 @@ function renderPage() {
   const category = params.get("category") || "";
   setActiveNav(page);
 
-  let title = "GTCC평생교육원";
+  let title = "GTCC대학교 평생교육원";
   let html = "";
   if (page.startsWith("course-")) {
     const courseTitle = courseTitleFromPage(page);
-    title = `${courseTitle} | GTCC평생교육원`;
+    title = `${courseTitle} | GTCC대학교 평생교육원`;
     html = renderCourseDetail(courseTitle);
   } else if (page === "all-courses") {
-    title = "전체강좌 | GTCC평생교육원";
+    title = "전체강좌 | GTCC대학교 평생교육원";
     html = renderCatalog("", category);
   } else if (page === "search") {
-    title = "검색 결과 | GTCC평생교육원";
+    title = "검색 결과 | GTCC대학교 평생교육원";
     html = renderCatalog(query, category);
   } else if (page === "certificates") {
-    title = "자격증 발급신청 | GTCC평생교육원";
+    title = "자격증 발급신청 | GTCC대학교 평생교육원";
     html = renderCertificates();
   } else if (page === "scholarship") {
-    title = "장학혜택 | GTCC평생교육원";
+    title = "장학혜택 | GTCC대학교 평생교육원";
     html = renderScholarship();
   } else if (page === "support") {
-    title = "고객센터 | GTCC평생교육원";
+    title = "고객센터 | GTCC대학교 평생교육원";
     html = renderSupport();
   } else if (page === "notice") {
-    title = "공지사항 | GTCC평생교육원";
+    title = "공지사항 | GTCC대학교 평생교육원";
     html = renderNotice();
   } else if (page.startsWith("notice-")) {
-    title = "공지사항 | GTCC평생교육원";
+    title = "공지사항 | GTCC대학교 평생교육원";
     html = renderNoticeArticle(page);
   } else {
     const labels = {
@@ -634,7 +634,7 @@ function renderPage() {
       lms: ["LMS", "등록한 과정의 학습 현황, 시험 응시, 수료 정보를 확인하는 학습자 전용 공간입니다.", "monitor"],
     };
     const [pageTitle, text, name] = labels[page] || ["서비스 안내", "해당 메뉴의 상세 콘텐츠를 준비했습니다. 필요한 내용은 고객센터로 문의해 주세요.", "book"];
-    title = `${pageTitle} | GTCC평생교육원`;
+    title = `${pageTitle} | GTCC대학교 평생교육원`;
     html = renderSimplePage(pageTitle, text, name);
   }
   document.title = title;

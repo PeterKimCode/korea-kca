@@ -1,3 +1,38 @@
+const KAKAO_URL = "https://open.kakao.com/o/pfJrLjVh";
+
+const icons = {
+  search:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35"/><circle cx="11" cy="11" r="7"/></svg>',
+  message:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.8 8.4 9.8 9.8 0 0 1-3.7-.7L3 21l1.8-5.1a8.2 8.2 0 0 1-1-4.1A8.4 8.4 0 0 1 12.5 3 8.3 8.3 0 0 1 21 11.5Z"/><path d="M8 10.5h8M8 14h5"/></svg>',
+  award:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="m8.5 12.5-1.6 7 5.1-3 5.1 3-1.6-7"/></svg>',
+  monitor:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  certificate:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 10h6M9 14h6M9 18h3"/></svg>',
+  book:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8"/></svg>',
+  play:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
+  arrow:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  "arrow-up":
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  check:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"/></svg>',
+  file:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h4M9.5 12h5M9.5 16h5"/></svg>',
+  headset:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v4a2 2 0 0 0 2 2h2v-7H6a2 2 0 0 0-2 2ZM20 13v4a2 2 0 0 1-2 2h-2v-7h2a2 2 0 0 1 2 2ZM16 19c0 1.2-1.4 2-4 2"/></svg>',
+  shield:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v6c0 5-3.2 8-8 9-4.8-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-5"/></svg>',
+  clock:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  layers:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>',
+};
+
 const courseGroups = {
   popular: [
     ["펫푸드스타일리스트 1급", "반려동물식품전문가", "photo-1548199973-03cce0bbc87b"],
@@ -7,7 +42,7 @@ const courseGroups = {
     ["간병사", "돌봄서비스전문가", "photo-1584515933487-779824d29309"],
     ["심리상담사 1급", "상담교육", "photo-1551836022-deb4988cc6c0"],
     ["방과후지도사", "아동교육", "photo-1509062522246-3755977927d7"],
-    ["노인교육지도사", "시니어교육", "photo-1573497019940-1c28c88b4f3e"]
+    ["노인교육지도사", "시니어교육", "photo-1573497019940-1c28c88b4f3e"],
   ],
   new: [
     ["반려동물관리사 1급", "반려동물복지전문가", "photo-1583337130417-3346a1be7dee"],
@@ -17,7 +52,7 @@ const courseGroups = {
     ["문해교육지도사", "성인학습지원", "photo-1513258496099-48168024aec0"],
     ["감정코칭지도사", "정서지원교육", "photo-1491438590914-bc09fcaaf77a"],
     ["재난안전지도사", "생활안전", "photo-1504384308090-c894fdcc538d"],
-    ["스피치지도사", "커뮤니케이션", "photo-1475721027785-f74eccf877e2"]
+    ["스피치지도사", "커뮤니케이션", "photo-1475721027785-f74eccf877e2"],
   ],
   middle: [
     ["디지털문서관리사", "교무행정", "photo-1554224155-6726b3ff858f"],
@@ -27,7 +62,7 @@ const courseGroups = {
     ["부동산권리분석사", "실무자격", "photo-1560518883-ce09059eeffa"],
     ["실버케어지도사", "돌봄교육", "photo-1573496359142-b8d87734a5a2"],
     ["생활지원사", "복지서비스", "photo-1543269865-cbf427effbad"],
-    ["아동요리지도사", "창의교육", "photo-1556911220-bff31c812dba"]
+    ["아동요리지도사", "창의교육", "photo-1556911220-bff31c812dba"],
   ],
   career: [
     ["독서지도사 1급", "아동독서코칭", "photo-1522202176988-66273c2fd55f"],
@@ -37,7 +72,7 @@ const courseGroups = {
     ["SNS마케팅전문가", "디지털마케팅", "photo-1611162617213-7d7a39e9b1d7"],
     ["문서실무전문가", "오피스역량", "photo-1450101499163-c8848c66ca85"],
     ["CS강사 1급", "고객응대", "photo-1556761175-b413da4baf72"],
-    ["진로코칭지도사", "커리어코칭", "photo-1552664730-d307ca884978"]
+    ["진로코칭지도사", "커리어코칭", "photo-1552664730-d307ca884978"],
   ],
   pass: [
     ["한국문화전문가 1급", "문화교육실무", "photo-1500530855697-b586d89ba3ee"],
@@ -47,9 +82,35 @@ const courseGroups = {
     ["안전교육지도사", "안전교육", "photo-1507537297725-24a1c029d3ca"],
     ["학교폭력예방상담사", "청소년상담", "photo-1529390079861-591de354faf5"],
     ["미술심리상담사", "예술상담", "photo-1513364776144-60967b0f800f"],
-    ["코딩지도사", "디지털교육", "photo-1515879218367-8466d910aaa4"]
-  ]
+    ["코딩지도사", "디지털교육", "photo-1515879218367-8466d910aaa4"],
+  ],
 };
+
+const noticeRows = [
+  [16, "[신규 개설] 창의놀이지도사 1급 과정 안내", "GTCC평생교육원", "2026.07.13"],
+  [15, "[신규 개설] 디지털문해교육사 1급 과정 안내", "GTCC평생교육원", "2026.07.03"],
+  [14, "[신규 개설] 휴대폰판매전문가 1급 과정 안내", "GTCC평생교육원", "2026.06.19"],
+  [13, "[신규 개설] 반려조관리사 1급 과정 안내", "GTCC평생교육원", "2026.06.12"],
+  [12, "[신규 개설] 붙임머리전문가 1급 과정 안내", "GTCC평생교육원", "2026.06.08"],
+  [11, "[신규 개설] 유기농식품교육전문가 1급 과정 안내", "GTCC평생교육원", "2026.05.18"],
+  [10, "[신규 개설] 가족공예지도사 1급 과정 안내", "GTCC평생교육원", "2026.04.24"],
+  [9, "[신규 개설] 발효효소관리사 1급 과정 안내", "GTCC평생교육원", "2026.04.22"],
+  [8, "[신규 개설] 민간안전경비사 1급 과정 안내", "GTCC평생교육원", "2026.04.15"],
+  [7, "[신규 개설] 스마트스토어마케팅전문가 1급 과정 안내", "GTCC평생교육원", "2026.04.14"],
+];
+
+const flatCourses = Object.values(courseGroups).flat();
+
+function icon(name) {
+  return `<span class="icon">${icons[name] || icons.book}</span>`;
+}
+
+function initializeIcons(scope = document) {
+  scope.querySelectorAll("[data-icon]").forEach((node) => {
+    node.classList.add("icon");
+    node.innerHTML = icons[node.dataset.icon] || icons.book;
+  });
+}
 
 function slugify(value) {
   return value
@@ -58,26 +119,20 @@ function slugify(value) {
     .replace(/^-|-$/g, "");
 }
 
+function courseHref(title) {
+  return `page.html?page=course-${encodeURIComponent(slugify(title))}`;
+}
+
 function createCourseCard([title, category, imageId]) {
-  const slug = slugify(title);
-  const href = `mock.html?page=course-${encodeURIComponent(slug)}`;
   return `
-    <a class="course-card" href="${href}" draggable="false">
+    <a class="course-card" href="${courseHref(title)}" draggable="false">
       <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=520&q=80" alt="${title}" loading="lazy" draggable="false" />
       <span>${category}</span>
       <strong>${title}</strong>
       <small>수강기간 4주 · 온라인시험</small>
-      <em>100% 할인</em>
+      <em>장학지원</em>
     </a>
   `;
-}
-
-for (const [key, courses] of Object.entries(courseGroups)) {
-  const row = document.querySelector(`[data-course-row="${key}"]`);
-  if (row) {
-    row.innerHTML = courses.map(createCourseCard).join("");
-    enableDragScroll(row);
-  }
 }
 
 function enableDragScroll(row) {
@@ -113,42 +168,320 @@ function enableDragScroll(row) {
     startDrag(event.clientX);
     row.setPointerCapture(event.pointerId);
   });
-
   row.addEventListener("pointermove", (event) => {
     moveDrag(event.clientX);
-    if (!isDragging) return;
-    event.preventDefault();
+    if (isDragging) event.preventDefault();
   });
-
-  function endDrag(event) {
+  row.addEventListener("pointerup", (event) => {
     finishDrag();
     if (row.hasPointerCapture(event.pointerId)) row.releasePointerCapture(event.pointerId);
-  }
-
-  row.addEventListener("pointerup", endDrag);
-  row.addEventListener("pointercancel", endDrag);
-  row.addEventListener("dragstart", (event) => {
-    event.preventDefault();
   });
-  row.addEventListener("mousedown", (event) => {
-    if (event.button !== 0 || isDragging) return;
-    startDrag(event.clientX);
+  row.addEventListener("pointercancel", finishDrag);
+  row.addEventListener("dragstart", (event) => event.preventDefault());
+  row.addEventListener("click", (event) => {
+    if (!didMove) return;
     event.preventDefault();
-  });
-  window.addEventListener("mousemove", (event) => {
-    if (!isDragging) return;
-    moveDrag(event.clientX);
-    event.preventDefault();
-  });
-  window.addEventListener("mouseup", finishDrag);
-  row.addEventListener(
-    "click",
-    (event) => {
-      if (!didMove) return;
-      event.preventDefault();
-      event.stopPropagation();
-      didMove = false;
-    },
-    true
-  );
+    event.stopPropagation();
+    didMove = false;
+  }, true);
 }
+
+function initHomeCourseRows() {
+  for (const [key, courses] of Object.entries(courseGroups)) {
+    const row = document.querySelector(`[data-course-row="${key}"]`);
+    if (!row) continue;
+    row.innerHTML = courses.map(createCourseCard).join("");
+    enableDragScroll(row);
+  }
+}
+
+function getParams() {
+  return new URLSearchParams(window.location.search);
+}
+
+function courseTitleFromPage(page) {
+  const slug = decodeURIComponent(page.replace(/^course-/, ""));
+  const found = flatCourses.find(([title]) => slugify(title) === slug);
+  return found ? found[0] : slug.split("-").filter(Boolean).join(" ");
+}
+
+function setActiveNav(page) {
+  const group = page.startsWith("course-") || page === "all-courses" || page === "search" ? "all-courses"
+    : page.startsWith("notice") ? "notice"
+    : ["course-question", "delivery-question", "payment-question", "group-question", "faq", "one-to-one", "support"].includes(page) ? "support"
+    : page === "certificates" || page === "certificate-guide" ? "certificates"
+    : page === "scholarship" ? "scholarship"
+    : "";
+  document.querySelectorAll(".main-nav a").forEach((link) => {
+    link.classList.toggle("is-active", link.dataset.nav === group);
+  });
+}
+
+function pageHero(title, eyebrow, text) {
+  return `
+    <section class="sub-hero">
+      <div>
+        <span class="eyebrow">${eyebrow}</span>
+        <h1>${title}</h1>
+        <p>${text}</p>
+      </div>
+      <nav aria-label="현재 위치">
+        <a href="index.html">홈</a>
+        <span>/</span>
+        <strong>${title}</strong>
+      </nav>
+    </section>
+  `;
+}
+
+function renderCatalog(query = "") {
+  const normalized = query.trim().toLowerCase();
+  const courses = normalized
+    ? flatCourses.filter(([title, category]) => `${title} ${category}`.toLowerCase().includes(normalized))
+    : flatCourses;
+  return `
+    ${pageHero(normalized ? "검색 결과" : "전체강좌", "Course Catalog", normalized ? `"${query}"에 해당하는 과정을 확인하세요.` : "관심 분야별 온라인 자격 과정을 한눈에 확인하세요.")}
+    <section class="catalog-shell">
+      <div class="catalog-filter">
+        ${["전체", "돌봄", "상담", "디지털", "안전", "문화"].map((item, index) => `<a class="${index === 0 ? "is-active" : ""}" href="page.html?page=all-courses">${item}</a>`).join("")}
+      </div>
+      <div class="catalog-grid">
+        ${courses.map(createCourseCard).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderCourseDetail(title) {
+  const lessons = [
+    "과정 오리엔테이션", "핵심 개념 이해", "직무 역할과 범위", "현장 사례 분석", "상담 및 기록관리",
+    "대상자 이해", "실무 체크리스트", "윤리와 개인정보", "응급상황 대응", "평가 문제 풀이",
+    "자격시험 안내", "최종 정리",
+  ];
+  return `
+    <section class="course-detail-shell">
+      <div class="course-detail-title">
+        <div>
+          <h1>${title}</h1>
+          <span>학습기간 4주 · 온라인 강의 · 온라인 시험</span>
+        </div>
+        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+      </div>
+
+      <div class="course-learning-grid">
+        <div class="course-learning-main">
+          <a class="course-video" href="https://www.youtube.com/watch?v=jNQXAC9IVRw" target="_blank" rel="noopener">
+            <strong>${title} 샘플 강의</strong>
+            <em>유튜브 영상 열기</em>
+            <b>GTCC평생교육원 온라인 강의</b>
+            <i></i>
+          </a>
+
+          <div class="lesson-now">
+            <span>강의목차</span>
+            <h2>${title} 과정 학습을 시작하세요</h2>
+            <strong>진도율 <em>0%</em></strong>
+          </div>
+          <div class="lesson-progress"><span></span></div>
+
+          <div class="course-info-grid">
+            <article>${icon("clock")}<h3>학습기간</h3><p>수강 신청 후 4주 동안 강의를 자유롭게 반복 학습할 수 있습니다.</p></article>
+            <article>${icon("monitor")}<h3>시험방식</h3><p>온라인 시험으로 진행되며, 교안과 핵심 정리를 기반으로 준비할 수 있습니다.</p></article>
+            <article>${icon("certificate")}<h3>자격 발급</h3><p>수료와 시험 기준 충족 후 자격증 발급 절차를 안내받을 수 있습니다.</p></article>
+          </div>
+        </div>
+
+        <aside class="course-learning-side">
+          <section class="course-side-card">
+            <div class="side-title"><h2>학습자료</h2><span>Download</span></div>
+            <div class="material-grid">
+              <a href="page.html?page=course-guide">${icon("file")}교안파일</a>
+              <a href="page.html?page=certificate-guide">${icon("book")}기출예상</a>
+              <a href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")}학습문의</a>
+            </div>
+          </section>
+          <section class="course-side-card">
+            <div class="side-title"><h2>강의목차 <span>총 ${lessons.length}강</span></h2><em>수강중</em></div>
+            <ol class="lesson-list">
+              ${lessons.map((lesson, index) => `<li class="${index === 0 ? "is-active" : ""}"><a href="page.html?page=lesson-${index + 1}"><span>${String(index + 1).padStart(2, "0")}강</span>${lesson}</a></li>`).join("")}
+            </ol>
+          </section>
+        </aside>
+      </div>
+    </section>
+  `;
+}
+
+function renderCertificates() {
+  return `
+    ${pageHero("자격증 발급신청", "Certificate", "수료와 시험 기준 충족 후 자격증 발급 절차를 확인하고 신청하세요.")}
+    <section class="content-shell two-column">
+      <div class="process-list">
+        ${[
+          ["수료 기준 확인", "강의 출석률과 시험 점수를 확인합니다."],
+          ["발급 신청서 작성", "이름, 연락처, 배송 정보를 정확히 입력합니다."],
+          ["발급비 결제", "과정별 발급 비용 및 배송 정책을 확인합니다."],
+          ["제작 및 배송", "접수 후 제작이 진행되며 배송 상태를 안내합니다."],
+        ].map((item, index) => `<article><span>${index + 1}</span><h3>${item[0]}</h3><p>${item[1]}</p></article>`).join("")}
+      </div>
+      <aside class="contact-panel">
+        ${icon("certificate")}
+        <h2>발급 전 확인이 필요하신가요?</h2>
+        <p>수료 기준, 이름 정정, 배송지 변경은 카카오톡 상담으로 빠르게 확인할 수 있습니다.</p>
+        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+      </aside>
+    </section>
+  `;
+}
+
+function renderScholarship() {
+  return `
+    ${pageHero("장학혜택", "Scholarship", "대상 과정과 기간에 따라 수강료 지원 및 학습 혜택을 제공합니다.")}
+    <section class="content-shell benefit-list">
+      ${[
+        ["수강료 지원", "선정 과정은 장학 혜택가로 수강할 수 있습니다.", "award"],
+        ["교안 제공", "시험 준비에 필요한 핵심 교안과 예상문제를 제공합니다.", "book"],
+        ["학습 상담", "과정 선택과 학습 일정 상담을 카카오톡으로 지원합니다.", "message"],
+      ].map(([title, text, name]) => `<article>${icon(name)}<h2>${title}</h2><p>${text}</p></article>`).join("")}
+    </section>
+  `;
+}
+
+function renderSupport() {
+  return `
+    ${pageHero("고객센터", "Support", "수강, 자격증 발급, 결제, 단체수강 문의를 안내합니다.")}
+    <section class="support-shell">
+      <aside class="customer-sidebar">
+        <h2>고객센터</h2>
+        <p>평일 09:00 - 18:00<br />토·일·공휴일 휴무</p>
+        <strong>1600-6735</strong>
+        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+      </aside>
+      <div class="support-grid">
+        ${[
+          ["수강관련문의", "수강 신청, 학습기간, 진도율 확인"],
+          ["자격증배송문의", "발급 신청, 제작, 배송 상태 확인"],
+          ["입금/결제문의", "결제 확인, 영수증, 환불 기준 안내"],
+          ["단체수강문의", "기관·기업 단체 과정 운영 상담"],
+          ["자주묻는질문", "학습자가 자주 묻는 질문 모음"],
+          ["원격지원", "학습 환경 점검 및 오류 확인"],
+        ].map(([title, text]) => `<a href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("headset")}<h3>${title}</h3><p>${text}</p></a>`).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderNotice() {
+  return `
+    <section class="notice-board-shell">
+      <aside class="customer-sidebar">
+        <h1>고객센터</h1>
+        <p>안녕하세요.<br />GTCC평생교육원입니다.</p>
+        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+        <nav>
+          <a class="is-active" href="page.html?page=notice">${icon("check")} 공지사항</a>
+          <a href="${KAKAO_URL}" target="_blank" rel="noopener">수강관련문의</a>
+          <a href="${KAKAO_URL}" target="_blank" rel="noopener">자격증배송문의</a>
+          <a href="${KAKAO_URL}" target="_blank" rel="noopener">입금/결제문의</a>
+          <a href="page.html?page=faq">자주묻는질문</a>
+        </nav>
+      </aside>
+      <section class="notice-board-content">
+        <div class="board-title-row">
+          <h2>공지사항</h2>
+          <div class="board-line"></div>
+          <nav><a href="index.html">홈</a><span>/</span><strong>공지사항</strong></nav>
+        </div>
+        <p class="board-count">공지사항 16건이 있습니다.</p>
+        <div class="notice-table-wrap">
+          <table class="notice-table">
+            <thead><tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일</th></tr></thead>
+            <tbody>
+              ${noticeRows.map(([number, title, writer, date]) => `<tr><td>${number}</td><td><a href="page.html?page=notice-${number}">${title}</a></td><td>${writer}</td><td>${date}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="board-pagination"><strong>1</strong><a href="page.html?page=notice-2">2</a><a href="page.html?page=notice-2">${icon("arrow")}</a></div>
+      </section>
+    </section>
+  `;
+}
+
+function renderNoticeArticle(page) {
+  const number = Number(page.replace("notice-", ""));
+  const row = noticeRows.find(([id]) => id === number) || noticeRows[0];
+  return `
+    ${pageHero("공지사항", "Notice", "GTCC평생교육원의 과정 및 운영 안내입니다.")}
+    <section class="article-shell">
+      <h2>${row[1]}</h2>
+      <dl><div><dt>작성자</dt><dd>${row[2]}</dd></div><div><dt>작성일</dt><dd>${row[3]}</dd></div></dl>
+      <p>해당 과정의 수강 신청, 학습자료, 시험 응시, 자격증 발급 안내가 업데이트되었습니다. 자세한 상담이 필요하신 경우 고객센터 문의 버튼을 이용해 주세요.</p>
+      <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+    </section>
+  `;
+}
+
+function renderSimplePage(title, text, iconName = "book") {
+  return `
+    ${pageHero(title, "GTCC", text)}
+    <section class="content-shell simple-page">
+      <article>${icon(iconName)}<h2>${title}</h2><p>${text}</p><a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a></article>
+    </section>
+  `;
+}
+
+function renderPage() {
+  const mount = document.getElementById("pageMount");
+  if (!mount) return;
+  const params = getParams();
+  const page = params.get("page") || "all-courses";
+  const query = params.get("q") || "";
+  setActiveNav(page);
+
+  let title = "GTCC평생교육원";
+  let html = "";
+  if (page.startsWith("course-")) {
+    const courseTitle = courseTitleFromPage(page);
+    title = `${courseTitle} | GTCC평생교육원`;
+    html = renderCourseDetail(courseTitle);
+  } else if (page === "all-courses") {
+    title = "전체강좌 | GTCC평생교육원";
+    html = renderCatalog();
+  } else if (page === "search") {
+    title = "검색 결과 | GTCC평생교육원";
+    html = renderCatalog(query);
+  } else if (page === "certificates") {
+    title = "자격증 발급신청 | GTCC평생교육원";
+    html = renderCertificates();
+  } else if (page === "scholarship") {
+    title = "장학혜택 | GTCC평생교육원";
+    html = renderScholarship();
+  } else if (page === "support") {
+    title = "고객센터 | GTCC평생교육원";
+    html = renderSupport();
+  } else if (page === "notice") {
+    title = "공지사항 | GTCC평생교육원";
+    html = renderNotice();
+  } else if (page.startsWith("notice-")) {
+    title = "공지사항 | GTCC평생교육원";
+    html = renderNoticeArticle(page);
+  } else {
+    const labels = {
+      faq: ["자주 묻는 질문", "학습 환경, 시험 응시, 자격증 발급 관련 질문을 정리했습니다.", "headset"],
+      "course-guide": ["수강안내", "신청부터 학습, 시험 응시까지의 기본 절차를 안내합니다.", "monitor"],
+      "certificate-guide": ["자격증 발급안내", "수료 후 자격증 신청과 배송 절차를 안내합니다.", "certificate"],
+      instructors: ["전문 교수진", "분야별 실무 경험을 바탕으로 구성된 강사진을 소개합니다.", "layers"],
+      "sample-lecture": ["샘플 강의", "과정 선택 전 온라인 강의 흐름을 미리 확인할 수 있습니다.", "play"],
+    };
+    const [pageTitle, text, name] = labels[page] || ["서비스 안내", "해당 메뉴의 상세 콘텐츠를 준비했습니다. 필요한 내용은 고객센터로 문의해 주세요.", "book"];
+    title = `${pageTitle} | GTCC평생교육원`;
+    html = renderSimplePage(pageTitle, text, name);
+  }
+  document.title = title;
+  mount.innerHTML = html;
+  initializeIcons(mount);
+}
+
+initializeIcons();
+initHomeCourseRows();
+renderPage();

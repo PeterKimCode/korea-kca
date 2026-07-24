@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GTCC평생교육원</title>
+    <meta
+      name="description"
+      content="GTCC평생교육원 과정, 자격증 발급, 장학혜택, 고객센터, 공지사항 안내 페이지입니다."
+    />
+    <link rel="icon" href="assets/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/favicon-192.png" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-top">
+        <a class="brand" href="index.html" aria-label="GTCC평생교육원 홈">
+          <img src="assets/gtcc-logo.png" alt="GTCC평생교육원 로고" />
+          <span>
+            <strong>GTCC평생교육원</strong>
+            <small>General Trias College of Cavite Lifelong Education</small>
+          </span>
+        </a>
+
+        <form class="search" action="page.html" method="get">
+          <input type="hidden" name="page" value="search" />
+          <input name="q" type="search" placeholder="찾으시는 자격 과정을 검색해보세요" />
+          <button type="submit" aria-label="검색"><span data-icon="search"></span></button>
+        </form>
+
+        <a class="kakao-link" href="https://open.kakao.com/o/pfJrLjVh" target="_blank" rel="noopener">
+          <span data-icon="message"></span>
+          고객센터 문의
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="주요 메뉴">
+        <a href="page.html?page=all-courses" data-nav="all-courses">전체강좌</a>
+        <a href="page.html?page=certificates" data-nav="certificates">자격증 발급신청</a>
+        <a href="page.html?page=scholarship" data-nav="scholarship">장학혜택</a>
+        <a href="page.html?page=support" data-nav="support">고객센터</a>
+        <a href="page.html?page=notice" data-nav="notice">공지사항</a>
+      </nav>
+
+      <div class="stats-band" aria-label="교육원 현황">
+        <div>누적 수강생 <strong>181,905명</strong></div>
+        <div>운영 과정 <strong>80개+</strong></div>
+        <div>온라인 시험 <strong>상시 응시</strong></div>
+        <div>자격 발급 <strong>원스톱 안내</strong></div>
+      </div>
+    </header>
+
+    <main id="pageMount"></main>
+
+    <footer class="site-footer">
+      <div class="footer-info">
+        <a class="brand small" href="index.html">
+          <img src="assets/gtcc-logo.png" alt="" />
+          <span><strong>GTCC평생교육원</strong></span>
+        </a>
+        <nav>
+          <a href="page.html?page=all-courses">전체강좌</a>
+          <a href="page.html?page=certificates">자격증 발급신청</a>
+          <a href="page.html?page=support">고객센터</a>
+          <a href="page.html?page=notice">공지사항</a>
+        </nav>
+        <p>GTCC평생교육원 | 온라인 민간자격 교육 및 학습지원센터</p>
+        <p>Copyright 2026 GTCC Lifelong Education Center. All Rights Reserved.</p>
+      </div>
+    </footer>
+
+    <aside class="floating-tools" aria-label="빠른 문의">
+      <a href="https://open.kakao.com/o/pfJrLjVh" target="_blank" rel="noopener">
+        <span data-icon="message"></span>
+        문의
+      </a>
+      <a href="#top" aria-label="맨 위로"><span data-icon="arrow-up"></span></a>
+    </aside>
+
+    <script src="assets/app.js"></script>
+  </body>
+</html>

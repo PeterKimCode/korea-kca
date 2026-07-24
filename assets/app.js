@@ -101,6 +101,49 @@ const noticeRows = [
 
 const flatCourses = Object.values(courseGroups).flat();
 
+const courseTagMap = {
+  "펫푸드스타일리스트 1급": ["돌봄", "반려동물"],
+  "병원상담사": ["상담", "의료서비스"],
+  "커피바리스타전문가 1급": ["문화", "식음료"],
+  "건강관리사": ["돌봄", "건강"],
+  "간병사": ["돌봄", "복지"],
+  "심리상담사 1급": ["상담", "심리"],
+  "방과후지도사": ["문화", "아동교육"],
+  "노인교육지도사": ["돌봄", "시니어"],
+  "반려동물관리사 1급": ["돌봄", "반려동물"],
+  "유기농 식품관리전문가 1급": ["안전", "식품"],
+  "가족문화상담사 1급": ["상담", "가족"],
+  "정리수납전문가": ["문화", "생활"],
+  "문해교육지도사": ["문화", "교육"],
+  "감정코칭지도사": ["상담", "정서"],
+  "재난안전지도사": ["안전", "생활안전"],
+  "스피치지도사": ["문화", "커뮤니케이션"],
+  "디지털문서관리사": ["디지털", "행정"],
+  "스마트폰활용지도사": ["디지털", "생활"],
+  "홈케어정리전문가": ["돌봄", "공간관리"],
+  "산림치유상담사": ["상담", "자연치유"],
+  "부동산권리분석사": ["문화", "실무"],
+  "실버케어지도사": ["돌봄", "시니어"],
+  "생활지원사": ["돌봄", "복지"],
+  "아동요리지도사": ["문화", "아동교육"],
+  "독서지도사 1급": ["문화", "아동교육"],
+  "챗GPT활용가 1급": ["디지털", "AI"],
+  "인공지능(AI)전문가 1급": ["디지털", "AI"],
+  "광고기획전문가 1급": ["디지털", "마케팅"],
+  "SNS마케팅전문가": ["디지털", "마케팅"],
+  "문서실무전문가": ["디지털", "오피스"],
+  "CS강사 1급": ["상담", "고객응대"],
+  "진로코칭지도사": ["상담", "커리어"],
+  "한국문화전문가 1급": ["문화", "교육"],
+  "컴퓨터활용가 1급": ["디지털", "업무자동화"],
+  "커리어상담가 1급": ["상담", "진로"],
+  "명상지도사 1급": ["상담", "마음건강"],
+  "안전교육지도사": ["안전", "교육"],
+  "학교폭력예방상담사": ["상담", "청소년"],
+  "미술심리상담사": ["상담", "예술"],
+  "코딩지도사": ["디지털", "교육"],
+};
+
 function icon(name) {
   return `<span class="icon">${icons[name] || icons.book}</span>`;
 }
@@ -123,12 +166,26 @@ function courseHref(title) {
   return `page.html?page=course-${encodeURIComponent(slugify(title))}`;
 }
 
+function getCourseTags(title, category = "") {
+  return courseTagMap[title] || [category.replace(/전문가|전문|교육|관리/g, "").slice(0, 4) || "자격"];
+}
+
+function getCourseByTitle(title) {
+  return flatCourses.find(([courseTitle]) => courseTitle === title);
+}
+
+function tagMarkup(tags) {
+  return `<div class="course-tags">${tags.map((tag) => `<span>#${tag}</span>`).join("")}</div>`;
+}
+
 function createCourseCard([title, category, imageId]) {
+  const tags = getCourseTags(title, category);
   return `
     <a class="course-card" href="${courseHref(title)}" draggable="false">
       <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=520&q=80" alt="${title}" loading="lazy" draggable="false" />
       <span>${category}</span>
       <strong>${title}</strong>
+      ${tagMarkup(tags)}
       <small>수강기간 4주 · 온라인시험</small>
       <em>장학지원</em>
     </a>
@@ -234,78 +291,81 @@ function pageHero(title, eyebrow, text) {
   `;
 }
 
-function renderCatalog(query = "") {
+function renderCatalog(query = "", categoryParam = "") {
   const normalized = query.trim().toLowerCase();
-  const courses = normalized
-    ? flatCourses.filter(([title, category]) => `${title} ${category}`.toLowerCase().includes(normalized))
-    : flatCourses;
+  const selectedCategory = categoryParam || "전체";
+  const categories = ["전체", "돌봄", "상담", "디지털", "안전", "문화"];
+  const courses = flatCourses.filter(([title, category]) => {
+    const tags = getCourseTags(title, category);
+    const searchable = `${title} ${category} ${tags.join(" ")}`.toLowerCase();
+    const matchesQuery = normalized ? searchable.includes(normalized) : true;
+    const matchesCategory = selectedCategory === "전체" ? true : tags.includes(selectedCategory);
+    return matchesQuery && matchesCategory;
+  });
   return `
     ${pageHero(normalized ? "검색 결과" : "전체강좌", "Course Catalog", normalized ? `"${query}"에 해당하는 과정을 확인하세요.` : "관심 분야별 온라인 자격 과정을 한눈에 확인하세요.")}
     <section class="catalog-shell">
       <div class="catalog-filter">
-        ${["전체", "돌봄", "상담", "디지털", "안전", "문화"].map((item, index) => `<a class="${index === 0 ? "is-active" : ""}" href="page.html?page=all-courses">${item}</a>`).join("")}
+        ${categories.map((item) => {
+          const href = item === "전체" ? "page.html?page=all-courses" : `page.html?page=all-courses&category=${encodeURIComponent(item)}`;
+          return `<a class="${item === selectedCategory ? "is-active" : ""}" href="${href}">#${item}</a>`;
+        }).join("")}
       </div>
       <div class="catalog-grid">
-        ${courses.map(createCourseCard).join("")}
+        ${courses.length ? courses.map(createCourseCard).join("") : `<p class="catalog-empty">해당 조건의 과정이 없습니다. 다른 분야를 선택해 주세요.</p>`}
       </div>
     </section>
   `;
 }
 
 function renderCourseDetail(title) {
-  const lessons = [
-    "과정 오리엔테이션", "핵심 개념 이해", "직무 역할과 범위", "현장 사례 분석", "상담 및 기록관리",
-    "대상자 이해", "실무 체크리스트", "윤리와 개인정보", "응급상황 대응", "평가 문제 풀이",
-    "자격시험 안내", "최종 정리",
-  ];
+  const course = getCourseByTitle(title) || [title, "온라인 자격 과정", "photo-1552664730-d307ca884978"];
+  const [courseTitle, category, imageId] = course;
+  const tags = getCourseTags(courseTitle, category);
+  const curriculum = ["과정 이해", "핵심 이론", "현장 사례", "실무 체크리스트", "평가 대비", "자격 발급 안내"];
   return `
     <section class="course-detail-shell">
-      <div class="course-detail-title">
-        <div>
-          <h1>${title}</h1>
-          <span>학습기간 4주 · 온라인 강의 · 온라인 시험</span>
-        </div>
-        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
-      </div>
-
-      <div class="course-learning-grid">
-        <div class="course-learning-main">
-          <a class="course-video" href="https://www.youtube.com/watch?v=jNQXAC9IVRw" target="_blank" rel="noopener">
-            <strong>${title} 샘플 강의</strong>
-            <em>유튜브 영상 열기</em>
-            <b>GTCC평생교육원 온라인 강의</b>
-            <i></i>
-          </a>
-
-          <div class="lesson-now">
-            <span>강의목차</span>
-            <h2>${title} 과정 학습을 시작하세요</h2>
-            <strong>진도율 <em>0%</em></strong>
-          </div>
-          <div class="lesson-progress"><span></span></div>
-
-          <div class="course-info-grid">
-            <article>${icon("clock")}<h3>학습기간</h3><p>수강 신청 후 4주 동안 강의를 자유롭게 반복 학습할 수 있습니다.</p></article>
-            <article>${icon("monitor")}<h3>시험방식</h3><p>온라인 시험으로 진행되며, 교안과 핵심 정리를 기반으로 준비할 수 있습니다.</p></article>
-            <article>${icon("certificate")}<h3>자격 발급</h3><p>수료와 시험 기준 충족 후 자격증 발급 절차를 안내받을 수 있습니다.</p></article>
+      <article class="course-intro-hero">
+        <div class="course-intro-copy">
+          <span class="eyebrow">${category}</span>
+          <h1>${courseTitle}</h1>
+          <p>기초 개념부터 현장에서 바로 쓰는 실무 흐름까지 4주 안에 정리하는 온라인 자격 과정입니다.</p>
+          ${tagMarkup(tags)}
+          <div class="hero-actions">
+            <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 수강 상담</a>
+            <a class="ghost-btn" href="page.html?page=certificates">${icon("certificate")} 발급 절차</a>
           </div>
         </div>
+        <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=960&q=80" alt="${courseTitle} 과정 이미지" />
+      </article>
 
-        <aside class="course-learning-side">
-          <section class="course-side-card">
-            <div class="side-title"><h2>학습자료</h2><span>Download</span></div>
-            <div class="material-grid">
-              <a href="page.html?page=course-guide">${icon("file")}교안파일</a>
-              <a href="page.html?page=certificate-guide">${icon("book")}기출예상</a>
-              <a href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")}학습문의</a>
-            </div>
-          </section>
-          <section class="course-side-card">
-            <div class="side-title"><h2>강의목차 <span>총 ${lessons.length}강</span></h2><em>수강중</em></div>
-            <ol class="lesson-list">
-              ${lessons.map((lesson, index) => `<li class="${index === 0 ? "is-active" : ""}"><a href="page.html?page=lesson-${index + 1}"><span>${String(index + 1).padStart(2, "0")}강</span>${lesson}</a></li>`).join("")}
+      <div class="course-intro-grid">
+        <section class="intro-main">
+          <div class="intro-block">
+            <span>Course Overview</span>
+            <h2>이런 분께 추천합니다</h2>
+            <p>관련 분야 입문자, 재취업을 준비하는 학습자, 현재 업무에 자격 기반 역량을 더하고 싶은 분들이 부담 없이 시작할 수 있도록 구성했습니다.</p>
+          </div>
+          <div class="course-outline">
+            <h2>과정 구성</h2>
+            <ol>
+              ${curriculum.map((item, index) => `<li><span>${String(index + 1).padStart(2, "0")}</span><strong>${item}</strong><p>${courseTitle} 학습에 필요한 핵심 내용을 단계별로 확인합니다.</p></li>`).join("")}
             </ol>
-          </section>
+          </div>
+        </section>
+
+        <aside class="intro-side">
+          <div class="course-summary">
+            <article>${icon("clock")}<strong>학습기간</strong><span>4주 온라인 수강</span></article>
+            <article>${icon("monitor")}<strong>평가방식</strong><span>온라인 시험</span></article>
+            <article>${icon("certificate")}<strong>수료혜택</strong><span>자격 발급 안내</span></article>
+          </div>
+          <div class="contact-panel compact-panel">
+            ${icon("headset")}
+            <h2>과정 선택이 고민되시나요?</h2>
+            <p>학습 목적과 일정에 맞는 과정을 카카오톡으로 상담받을 수 있습니다.</p>
+            <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+          </div>
         </aside>
       </div>
     </section>
@@ -436,6 +496,7 @@ function renderPage() {
   const params = getParams();
   const page = params.get("page") || "all-courses";
   const query = params.get("q") || "";
+  const category = params.get("category") || "";
   setActiveNav(page);
 
   let title = "GTCC평생교육원";
@@ -446,10 +507,10 @@ function renderPage() {
     html = renderCourseDetail(courseTitle);
   } else if (page === "all-courses") {
     title = "전체강좌 | GTCC평생교육원";
-    html = renderCatalog();
+    html = renderCatalog("", category);
   } else if (page === "search") {
     title = "검색 결과 | GTCC평생교육원";
-    html = renderCatalog(query);
+    html = renderCatalog(query, category);
   } else if (page === "certificates") {
     title = "자격증 발급신청 | GTCC평생교육원";
     html = renderCertificates();
@@ -472,6 +533,7 @@ function renderPage() {
       "certificate-guide": ["자격증 발급안내", "수료 후 자격증 신청과 배송 절차를 안내합니다.", "certificate"],
       instructors: ["전문 교수진", "분야별 실무 경험을 바탕으로 구성된 강사진을 소개합니다.", "layers"],
       "sample-lecture": ["샘플 강의", "과정 선택 전 온라인 강의 흐름을 미리 확인할 수 있습니다.", "play"],
+      lms: ["LMS", "등록한 과정의 학습 현황, 시험 응시, 수료 정보를 확인하는 학습자 전용 공간입니다.", "monitor"],
     };
     const [pageTitle, text, name] = labels[page] || ["서비스 안내", "해당 메뉴의 상세 콘텐츠를 준비했습니다. 필요한 내용은 고객센터로 문의해 주세요.", "book"];
     title = `${pageTitle} | GTCC평생교육원`;

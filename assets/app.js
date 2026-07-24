@@ -512,7 +512,7 @@ function renderSupport() {
       <aside class="customer-sidebar">
         <h2>고객센터</h2>
         <p>평일 09:00 - 18:00<br />토·일·공휴일 휴무</p>
-        <strong>1600-6735</strong>
+        <strong>010-5909-9320</strong>
         <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
       </aside>
       <div class="support-grid">

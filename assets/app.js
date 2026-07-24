@@ -181,15 +181,41 @@ function tagMarkup(tags) {
 function createCourseCard([title, category, imageId]) {
   const tags = getCourseTags(title, category);
   return `
-    <a class="course-card" href="${courseHref(title)}" draggable="false">
+    <article class="course-card" data-href="${courseHref(title)}" role="link" tabindex="0" draggable="false">
       <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=520&q=80" alt="${title}" loading="lazy" draggable="false" />
       <span>${category}</span>
       <strong>${title}</strong>
       ${tagMarkup(tags)}
       <small>수강기간 4주 · 온라인시험</small>
       <em>장학지원</em>
-    </a>
+    </article>
   `;
+}
+
+function bindCourseCardNavigation(scope = document) {
+  scope.querySelectorAll(".course-card[data-href]").forEach((card) => {
+    if (card.dataset.bound === "true") return;
+    card.dataset.bound = "true";
+    let pointerStart = null;
+    const navigate = () => {
+      window.location.href = card.dataset.href;
+    };
+    card.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      pointerStart = { x: event.clientX, y: event.clientY };
+    });
+    card.addEventListener("pointerup", (event) => {
+      if (!pointerStart) return;
+      const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
+      pointerStart = null;
+      if (moved <= 10) navigate();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      navigate();
+    });
+  });
 }
 
 function enableDragScroll(row) {
@@ -221,9 +247,7 @@ function enableDragScroll(row) {
 
   row.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
-    event.preventDefault();
     startDrag(event.clientX);
-    row.setPointerCapture(event.pointerId);
   });
   row.addEventListener("pointermove", (event) => {
     moveDrag(event.clientX);
@@ -231,7 +255,6 @@ function enableDragScroll(row) {
   });
   row.addEventListener("pointerup", (event) => {
     finishDrag();
-    if (row.hasPointerCapture(event.pointerId)) row.releasePointerCapture(event.pointerId);
   });
   row.addEventListener("pointercancel", finishDrag);
   row.addEventListener("dragstart", (event) => event.preventDefault());
@@ -248,6 +271,7 @@ function initHomeCourseRows() {
     const row = document.querySelector(`[data-course-row="${key}"]`);
     if (!row) continue;
     row.innerHTML = courses.map(createCourseCard).join("");
+    bindCourseCardNavigation(row);
     enableDragScroll(row);
   }
 }
@@ -542,6 +566,7 @@ function renderPage() {
   document.title = title;
   mount.innerHTML = html;
   initializeIcons(mount);
+  bindCourseCardNavigation(mount);
 }
 
 initializeIcons();

@@ -1,4 +1,7 @@
 const KAKAO_URL = "https://open.kakao.com/o/pfJrLjVh";
+const CERTIFICATE_CHECK_URL = "https://www.kcqa.kr/";
+
+const HERO_SLIDES = Array.from({ length: 15 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.png`);
 
 const icons = {
   search:
@@ -153,6 +156,32 @@ function initializeIcons(scope = document) {
     node.classList.add("icon");
     node.innerHTML = icons[node.dataset.icon] || icons.book;
   });
+}
+
+function initHeroSlider() {
+  const slider = document.querySelector("[data-hero-slider]");
+  if (!slider || slider.dataset.ready === "true") return;
+  slider.dataset.ready = "true";
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  slider.innerHTML = `
+    <div class="hero-slide-stage">
+      ${HERO_SLIDES.map((src, index) => `<img class="hero-slide ${index === 0 ? "is-active" : ""}" src="${src}" alt="GTCC평생교육원 과정 이미지 ${index + 1}" ${index === 0 ? "" : "loading=\"lazy\""} />`).join("")}
+    </div>
+    <div class="hero-slide-caption">
+      <span>GTCC Programs</span>
+      <strong>전문 자격 과정 이미지</strong>
+      <small>자동 슬라이드</small>
+    </div>
+    <div class="hero-slide-progress"><span></span></div>
+  `;
+  if (prefersReducedMotion) return;
+  const slides = slider.querySelectorAll(".hero-slide");
+  let active = 0;
+  window.setInterval(() => {
+    slides[active].classList.remove("is-active");
+    active = (active + 1) % slides.length;
+    slides[active].classList.add("is-active");
+  }, 3600);
 }
 
 function slugify(value) {
@@ -412,7 +441,10 @@ function renderCertificates() {
         ${icon("certificate")}
         <h2>발급 전 확인이 필요하신가요?</h2>
         <p>수료 기준, 이름 정정, 배송지 변경은 카카오톡 상담으로 빠르게 확인할 수 있습니다.</p>
-        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+        <div class="contact-actions">
+          <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+          <a class="ghost-btn" href="${CERTIFICATE_CHECK_URL}" target="_blank" rel="noopener">${icon("shield")} 자격증 확인</a>
+        </div>
       </aside>
     </section>
   `;
@@ -570,5 +602,6 @@ function renderPage() {
 }
 
 initializeIcons();
+initHeroSlider();
 initHomeCourseRows();
 renderPage();

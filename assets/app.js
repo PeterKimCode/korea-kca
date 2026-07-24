@@ -473,7 +473,7 @@ function renderCertificates() {
     <section class="content-shell two-column">
       <div class="process-list">
         ${[
-          ["수료 기준 확인", "강의 출석률과 시험 점수를 확인합니다."],
+          ["수료 기준 확인", "LMS를 통한 강의 출석률과 시험 점수를 확인합니다."],
           ["발급 신청서 작성", "이름, 연락처, 배송 정보를 정확히 입력합니다."],
           ["발급비 결제", "과정별 발급 비용 및 배송 정책을 확인합니다."],
           ["제작 및 배송", "접수 후 제작이 진행되며 배송 상태를 안내합니다."],
@@ -481,7 +481,7 @@ function renderCertificates() {
       </div>
       <aside class="contact-panel">
         ${icon("certificate")}
-        <h2>발급된 모든자격증을 인터넷으로 확인하실수 있습니다.</h2>
+        <h2>발급된 모든자격증을 온라인을 통하여 확인하실수 있습니다.</h2>
         <p>자격증확인에 들어가셔서 본인의 이름과 전화번호를 치시면 발급받은 자격증을 확인하실수 있으며 재발급도 받으실수 있습니다.</p>
         <div class="contact-actions">
           <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>

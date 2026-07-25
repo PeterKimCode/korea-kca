@@ -46,6 +46,7 @@ const icons = {
  */
 const courseGroups = {
   popular: [
+    ["AIST(도형)상담지도사", "상담교육", "assets/hero-slides/도형.png"],
     ["TESOL(테솔)지도자", "외국어교육", "assets/hero-slides/테솔.png"],
     ["청소년상담", "청소년상담", "assets/hero-slides/청소 년상담 .png"],
     ["펫푸드스타일리스트 1급", "반려동물식품전문가", "photo-1548199973-03cce0bbc87b"],
@@ -58,6 +59,7 @@ const courseGroups = {
     ["노인교육지도사", "시니어교육", "photo-1573497019940-1c28c88b4f3e"],
   ],
   new: [
+    ["방송미디어전문지도사", "방송미디어", "assets/hero-slides/방송미디어 지도사 .png"],
     ["반려동물관리사 1급", "반려동물복지전문가", "photo-1583337130417-3346a1be7dee"],
     ["유기농 식품관리전문가 1급", "식품안전관리", "photo-1542838132-92c53300491e"],
     ["TESOL(테솔)지도사", "영어전문", "photo-1517841905240-472988babdf9"],
@@ -118,6 +120,8 @@ const flatCourses = Object.values(courseGroups).flat();
 
 // 전체강좌 필터에 사용하는 해시태그입니다. 키는 courseGroups의 강좌명과 정확히 같아야 합니다.
 const courseTagMap = {
+  "방송미디어전문지도사": ["방송", "국제"],
+  "AIST(도형)상담지도사": ["상담", "국제"],
   "TESOL(테솔)지도자": ["교육", "외국어"],
   "청소년상담": ["상담", "정서"],
   "펫푸드스타일리스트 1급": ["돌봄", "반려동물"],

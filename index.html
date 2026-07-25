@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
+    <!-- 공통 헤더: page.html과 구조를 맞춰야 하며, 현황 문구 변경 시 반복된 3세트를 모두 수정합니다. -->
     <header class="site-header">
       <div class="stats-band" aria-label="교육원 현황">
         <div class="stats-track">
@@ -80,6 +81,7 @@
     </header>
 
     <main>
+      <!-- 메인 히어로: 실제 슬라이드 이미지는 assets/app.js의 HERO_SLIDES가 주입합니다. -->
       <section class="hero-section">
         <div class="hero-card">
           <div class="hero-copy">
@@ -123,6 +125,7 @@
         </div>
       </section>
 
+      <!-- 강좌 행의 카드 데이터는 assets/app.js의 courseGroups에서 자동 생성됩니다. -->
       <section class="course-section light">
         <div class="section-head">
           <p>#실무형 인기 자격 과정</p>
@@ -252,6 +255,7 @@
         </div>
       </section>
 
+      <!-- 최신 공지 미리보기: assets/app.js의 noticeRows 최상단 4개와 동일하게 유지합니다. -->
       <section class="notice-section">
         <div class="notice-list">
           <h2>공지사항</h2>
@@ -274,6 +278,7 @@
       </section>
     </main>
 
+    <!-- 공통 푸터: 메뉴나 기관 정보 변경 시 page.html도 함께 수정합니다. -->
     <footer class="site-footer">
       <div class="footer-info">
         <a class="brand small" href="index.html">

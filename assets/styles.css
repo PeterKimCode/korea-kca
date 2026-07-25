@@ -1,4 +1,5 @@
 :root {
+  /* 브랜드 색상과 공통 크기: 사이트 전체 톤을 바꿀 때 우선 조정하는 변수입니다. */
   --wine: #8f1734;
   --wine-dark: #5f1023;
   --gold: #caa35b;
@@ -62,6 +63,7 @@ img {
   stroke-linejoin: round;
 }
 
+/* ===== 공통 헤더와 내비게이션 ===== */
 .site-header {
   position: relative;
   z-index: 5;
@@ -213,6 +215,7 @@ img {
   background: var(--wine);
 }
 
+/* ===== 상단 고정 현황 전광판 ===== */
 .stats-band {
   position: fixed;
   top: 0;
@@ -275,6 +278,7 @@ img {
   }
 }
 
+/* ===== 메인 히어로와 이미지 슬라이드 ===== */
 .hero-section {
   padding: 42px 0 58px;
 }
@@ -535,6 +539,7 @@ img {
   font-weight: 700;
 }
 
+/* ===== 메인 강좌 슬라이더와 강좌 카드 ===== */
 .course-section {
   position: relative;
   display: grid;
@@ -1328,6 +1333,11 @@ img {
   padding: 54px 0 88px;
 }
 
+.notice-board-content {
+  /* 넓은 공지 표는 이 열 안에서만 스크롤되고 모바일 문서 폭은 늘리지 않습니다. */
+  min-width: 0;
+}
+
 .board-title-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1920,6 +1930,7 @@ img {
   line-height: 1.85;
 }
 
+/* ===== 태블릿 반응형 ===== */
 @media (max-width: 980px) {
   .header-top {
     flex-wrap: wrap;
@@ -2009,6 +2020,7 @@ img {
   }
 }
 
+/* ===== 모바일 반응형 ===== */
 @media (max-width: 620px) {
   .header-top,
   .main-nav,

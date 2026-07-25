@@ -1,8 +1,11 @@
+// 사이트 전역에서 함께 사용하는 외부 링크입니다. 주소 변경 시 이 상수부터 수정하세요.
 const KAKAO_URL = "https://open.kakao.com/o/pfJrLjVh";
 const CERTIFICATE_CHECK_URL = "https://www.kcqa.kr/";
 
+// 메인 히어로 슬라이드: gtcc-slide-01.webp부터 번호가 끊기지 않도록 저장하고 개수만 조정합니다.
 const HERO_SLIDES = Array.from({ length: 8 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.webp`);
 
+// 공통 아이콘 원본입니다. 화면에서는 data-icon 속성 또는 icon() 함수로 불러옵니다.
 const icons = {
   search:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35"/><circle cx="11" cy="11" r="7"/></svg>',
@@ -36,6 +39,11 @@ const icons = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>',
 };
 
+/*
+ * 메인/전체강좌/상세페이지가 함께 사용하는 강좌 원본입니다.
+ * 각 항목 형식: ["강좌명", "분야 설명", "이미지"]
+ * 이미지는 Unsplash 사진 ID, assets 내부 경로, 또는 https 전체 주소를 사용할 수 있습니다.
+ */
 const courseGroups = {
   popular: [
     ["펫푸드스타일리스트 1급", "반려동물식품전문가", "photo-1548199973-03cce0bbc87b"],
@@ -89,6 +97,8 @@ const courseGroups = {
   ],
 };
 
+// 공지사항 목록 원본입니다. 형식: [번호, 제목, 작성자, "YYYY.MM.DD"]
+// 메인 화면의 최신 공지 4개는 index.html에도 있으므로 새 공지 등록 시 함께 갱신합니다.
 const noticeRows = [
   [16, "[신규 개설] TESOL(테솔) 과정안내", "GTCC평생교육원", "2026.07.13"],
   [15, "[신규 개설] 커피바리스타 과정안내", "GTCC평생교육원", "2026.07.03"],
@@ -104,6 +114,7 @@ const noticeRows = [
 
 const flatCourses = Object.values(courseGroups).flat();
 
+// 전체강좌 필터에 사용하는 해시태그입니다. 키는 courseGroups의 강좌명과 정확히 같아야 합니다.
 const courseTagMap = {
   "펫푸드스타일리스트 1급": ["돌봄", "반려동물"],
   "병원상담사": ["상담", "의료서비스"],
@@ -245,6 +256,12 @@ function getCourseByTitle(title) {
   return flatCourses.find(([courseTitle]) => courseTitle === title);
 }
 
+// 짧은 값은 Unsplash 사진 ID로, 경로나 전체 URL은 그대로 이미지 주소로 사용합니다.
+function courseImageUrl(imageSource, width = 520) {
+  if (/^(https?:\/\/|\.{0,2}\/|assets\/)/.test(imageSource)) return imageSource;
+  return `https://images.unsplash.com/${imageSource}?auto=format&fit=crop&w=${width}&q=80`;
+}
+
 function tagMarkup(tags) {
   return `<div class="course-tags">${tags.map((tag) => `<span>#${tag}</span>`).join("")}</div>`;
 }
@@ -253,7 +270,7 @@ function createCourseCard([title, category, imageId]) {
   const tags = getCourseTags(title, category);
   return `
     <article class="course-card" data-href="${courseHref(title)}" role="link" tabindex="0" draggable="false">
-      <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=520&q=80" alt="${title}" loading="lazy" draggable="false" />
+      <img src="${courseImageUrl(imageId)}" alt="${title}" loading="lazy" draggable="false" />
       <span>${category}</span>
       <strong>${title}</strong>
       ${tagMarkup(tags)}
@@ -290,6 +307,7 @@ function bindCourseCardNavigation(scope = document) {
 }
 
 function enableDragScroll(row) {
+  // 카드 클릭과 가로 드래그를 구분해, 드래그 도중 상세페이지로 이동하지 않게 합니다.
   let isDragging = false;
   let didMove = false;
   let startX = 0;
@@ -387,6 +405,7 @@ function pageHero(title, eyebrow, text) {
 }
 
 function renderCatalog(query = "", categoryParam = "") {
+  // category 쿼리와 courseTagMap을 대조해 해당 태그의 강좌만 표시합니다.
   const normalized = query.trim().toLowerCase();
   const selectedCategory = categoryParam || "전체";
   const categories = ["전체", "돌봄", "상담", "디지털", "안전", "문화"];
@@ -431,7 +450,7 @@ function renderCourseDetail(title) {
             <a class="ghost-btn" href="page.html?page=certificates">${icon("certificate")} 발급 절차</a>
           </div>
         </div>
-        <img src="https://images.unsplash.com/${imageId}?auto=format&fit=crop&w=960&q=80" alt="${courseTitle} 과정 이미지" />
+        <img src="${courseImageUrl(imageId, 960)}" alt="${courseTitle} 과정 이미지" />
       </article>
 
       <div class="course-intro-grid">
@@ -589,6 +608,7 @@ function renderSimplePage(title, text, iconName = "book") {
 }
 
 function renderPage() {
+  // page.html?page=... 값을 실제 하위 페이지 렌더러에 연결하는 중앙 라우터입니다.
   const mount = document.getElementById("pageMount");
   if (!mount) return;
   const params = getParams();
@@ -643,6 +663,7 @@ function renderPage() {
   bindCourseCardNavigation(mount);
 }
 
+// index.html과 page.html이 같은 스크립트를 사용하므로, 존재하는 영역만 선택적으로 초기화합니다.
 initializeIcons();
 initHeroSlider();
 initHomeCourseRows();

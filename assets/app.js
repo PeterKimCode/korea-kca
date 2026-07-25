@@ -58,6 +58,7 @@ const courseGroups = {
     ["스피치지도사", "커뮤니케이션", "photo-1475721027785-f74eccf877e2"],
   ],
   middle: [
+    ["국제탐정사", "탐정업무", "assets/hero-slides/gtcc-slide-05.webp"]
     ["국제탐정사", "탐정업무", "photo-assets/hero-slides/gtcc-slide-05.webp"],
     ["스마트폰활용지도사", "생활디지털교육", "photo-1512428559087-560fa5ceab42"],
     ["홈케어정리전문가", "생활공간관리", "photo-1524758631624-e2822e304c36"],

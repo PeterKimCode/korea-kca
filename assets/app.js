@@ -46,7 +46,7 @@ const icons = {
  */
 const courseGroups = {
   popular: [
-    ["TESOL(테솔)지도자",assets/hero-slides/테솔.png"],
+    ["TESOL(테솔)지도자", "assets/hero-slides/테솔.png"],
     ["청소년상담", "청소년상담", "assets/hero-slides/청소 년상담 .png"],
     ["펫푸드스타일리스트 1급", "반려동물식품전문가", "photo-1548199973-03cce0bbc87b"],
     ["병원상담사", "의료서비스상담전문가", "photo-1576091160550-2173dba999ef"],

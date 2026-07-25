@@ -59,7 +59,7 @@ const courseGroups = {
   ],
   middle: [
     ["국제탐정사", "탐정업무", "assets/hero-slides/gtcc-slide-05.webp"]
-    ["국제탐정사", "탐정업무", "photo-assets/hero-slides/gtcc-slide-05.webp"],
+    ["디지털문서관리사", "교무행정", "photo-1554224155-6726b3ff858f"],
     ["스마트폰활용지도사", "생활디지털교육", "photo-1512428559087-560fa5ceab42"],
     ["홈케어정리전문가", "생활공간관리", "photo-1524758631624-e2822e304c36"],
     ["산림치유상담사", "자연치유", "photo-1441974231531-c6227db76b6e"],

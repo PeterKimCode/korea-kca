@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GTCC 콘텐츠 관리자</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="../assets/favicon.ico" sizes="any" />
+    <link rel="stylesheet" href="../assets/admin.css?v=20260727" />
+  </head>
+  <body class="admin-body">
+    <main class="admin-auth" id="setupScreen" hidden>
+      <section class="auth-panel setup-panel">
+        <img src="../assets/gtcc-logo.png" alt="GTCC대학교평생교육원" />
+        <span class="admin-kicker">최초 1회 설정</span>
+        <h1>관리자 연결이 필요합니다</h1>
+        <p>아래 세 단계가 끝나면 이 화면에서 강좌, 공지, 슬라이드를 바로 수정할 수 있습니다.</p>
+        <ol class="setup-steps">
+          <li><strong>1</strong><span>Supabase 프로젝트를 만들고 <code>supabase/schema.sql</code>을 실행합니다.</span></li>
+          <li><strong>2</strong><span>관리자 계정 두 개를 만들고 UUID를 <code>admin_users</code>에 등록합니다.</span></li>
+          <li><strong>3</strong><span><code>assets/config.js</code>에 Project URL과 anon key를 입력합니다.</span></li>
+        </ol>
+        <a class="admin-primary" href="https://github.com/PeterKimCode/korea-kca/blob/main/SUPABASE_SETUP.md">자세한 연결 방법 보기</a>
+        <a class="admin-text-link" href="../index.html">홈페이지로 돌아가기</a>
+      </section>
+    </main>
+
+    <main class="admin-auth" id="loginScreen" hidden>
+      <section class="auth-panel">
+        <img src="../assets/gtcc-logo.png" alt="" />
+        <span class="admin-kicker">GTCC Content Manager</span>
+        <h1>관리자 로그인</h1>
+        <p>등록된 이메일과 비밀번호를 입력해 주세요.</p>
+        <form id="loginForm">
+          <label>이메일<input type="email" name="email" autocomplete="username" required /></label>
+          <label>비밀번호<input type="password" name="password" autocomplete="current-password" required minlength="6" /></label>
+          <button class="admin-primary" type="submit">로그인</button>
+          <p class="form-error" id="loginError" role="alert"></p>
+        </form>
+        <a class="admin-text-link" href="../index.html">홈페이지로 돌아가기</a>
+      </section>
+    </main>
+
+    <div class="admin-app" id="adminApp" hidden>
+      <header class="admin-header">
+        <a class="admin-brand" href="../index.html">
+          <img src="../assets/gtcc-logo.png" alt="" />
+          <span><strong>GTCC 콘텐츠 관리자</strong><small>홈페이지 내용을 쉽고 안전하게 관리합니다</small></span>
+        </a>
+        <div class="admin-account">
+          <span id="adminName">관리자</span>
+          <button class="admin-icon-button" id="helpButton" type="button" title="사용 방법" aria-label="사용 방법"><span data-icon="help"></span></button>
+          <button class="admin-secondary" id="logoutButton" type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <aside class="admin-sidebar" aria-label="관리 메뉴">
+          <p>수정할 항목을 선택하세요</p>
+          <button class="admin-nav is-active" type="button" data-entity="courses">
+            <span class="nav-symbol" data-icon="courses" aria-hidden="true"></span><span><strong>강좌 관리</strong><small>강좌와 소개 수정</small></span>
+          </button>
+          <button class="admin-nav" type="button" data-entity="notices">
+            <span class="nav-symbol" data-icon="notices" aria-hidden="true"></span><span><strong>공지 관리</strong><small>새 소식 등록</small></span>
+          </button>
+          <button class="admin-nav" type="button" data-entity="slides">
+            <span class="nav-symbol" data-icon="slides" aria-hidden="true"></span><span><strong>슬라이드 관리</strong><small>메인 사진과 순서</small></span>
+          </button>
+          <div class="admin-sidebar-help">
+            <strong>실수해도 괜찮습니다</strong>
+            <p>삭제한 내용은 휴지통에서 되살릴 수 있고 변경 기록도 남습니다.</p>
+          </div>
+        </aside>
+
+        <main class="admin-main">
+          <section class="admin-welcome">
+            <div>
+              <span class="admin-kicker">바로 공개되는 콘텐츠</span>
+              <h1 id="sectionTitle">강좌 관리</h1>
+              <p id="sectionDescription">홈페이지에 표시할 강좌를 추가하거나 수정합니다.</p>
+            </div>
+            <button class="admin-primary" id="newButton" type="button">새 강좌 추가</button>
+          </section>
+
+          <section class="admin-toolbar">
+            <label class="admin-search">목록 검색<input id="listSearch" type="search" placeholder="이름으로 찾아보세요" /></label>
+            <div>
+              <button class="admin-secondary" id="trashButton" type="button">휴지통</button>
+              <button class="admin-secondary" id="historyButton" type="button">변경 기록</button>
+              <button class="admin-secondary" id="importButton" type="button">기본 내용 가져오기</button>
+            </div>
+          </section>
+
+          <p class="admin-status" id="dataStatus" role="status"></p>
+          <section class="admin-list" id="contentList" aria-live="polite"></section>
+        </main>
+      </div>
+    </div>
+
+    <dialog class="admin-dialog" id="editorDialog">
+      <form method="dialog" class="dialog-shell" id="editorForm">
+        <header>
+          <div><span class="admin-kicker">내용 편집</span><h2 id="editorTitle">새 강좌 추가</h2></div>
+          <button class="dialog-close" type="button" data-close-dialog aria-label="닫기">×</button>
+        </header>
+        <div class="dialog-body" id="editorFields"></div>
+        <footer>
+          <button class="admin-secondary" type="button" data-close-dialog>취소</button>
+          <button class="admin-secondary" id="previewButton" type="button">미리보기</button>
+          <button class="admin-primary" type="submit">저장하고 바로 공개</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog class="admin-dialog preview-dialog" id="previewDialog">
+      <section class="dialog-shell">
+        <header><div><span class="admin-kicker">게시 전 확인</span><h2>미리보기</h2></div><button class="dialog-close" type="button" data-close-preview aria-label="닫기">×</button></header>
+        <div class="dialog-body" id="previewContent"></div>
+        <footer><button class="admin-primary" type="button" data-close-preview>확인했습니다</button></footer>
+      </section>
+    </dialog>
+
+    <dialog class="admin-dialog history-dialog" id="historyDialog">
+      <section class="dialog-shell">
+        <header><div><span class="admin-kicker">안전한 되돌리기</span><h2>변경 기록</h2></div><button class="dialog-close" type="button" data-close-history aria-label="닫기">×</button></header>
+        <div class="dialog-body"><div class="history-list" id="historyList"></div></div>
+        <footer><button class="admin-secondary" type="button" data-close-history>닫기</button></footer>
+      </section>
+    </dialog>
+
+    <dialog class="admin-dialog help-dialog" id="helpDialog">
+      <section class="dialog-shell">
+        <header><div><span class="admin-kicker">한 장 사용법</span><h2>홈페이지 수정 순서</h2></div><button class="dialog-close" type="button" data-close-help aria-label="닫기">×</button></header>
+        <div class="dialog-body help-steps">
+          <article><span>1</span><div><strong>왼쪽에서 종류 선택</strong><p>강좌, 공지, 슬라이드 중 수정할 메뉴를 누릅니다.</p></div></article>
+          <article><span>2</span><div><strong>추가 또는 수정</strong><p>새로 추가 버튼을 누르거나 기존 항목의 수정 버튼을 누릅니다.</p></div></article>
+          <article><span>3</span><div><strong>사진과 글 입력</strong><p>사진 선택 버튼으로 사진을 고르면 자동으로 크기가 줄어듭니다.</p></div></article>
+          <article><span>4</span><div><strong>미리보기 확인</strong><p>미리보기에서 사진과 글이 맞는지 한 번 확인합니다.</p></div></article>
+          <article><span>5</span><div><strong>저장하고 바로 공개</strong><p>확인 창에서 승인하면 홈페이지에 즉시 표시됩니다.</p></div></article>
+        </div>
+        <footer><button class="admin-primary" type="button" data-close-help>알겠습니다</button></footer>
+      </section>
+    </dialog>
+
+    <div class="admin-toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="../assets/config.js?v=20260727"></script>
+    <script src="../assets/content-store.js?v=20260727"></script>
+    <script src="../assets/app.js?v=20260727"></script>
+    <script src="../assets/admin.js?v=20260727"></script>
+  </body>
+</html>

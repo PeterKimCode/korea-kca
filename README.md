@@ -1,6 +1,20 @@
 # GTCC대학교평생교육원 홈페이지 운영 가이드
 
-이 저장소는 별도 빌드 과정 없이 동작하는 정적 HTML/CSS/JavaScript 사이트입니다. 메인 페이지는 `index.html`, 하위 페이지는 `page.html`, 공통 데이터와 화면 생성 로직은 `assets/app.js`, 전체 스타일은 `assets/styles.css`에서 관리합니다.
+이 저장소는 별도 빌드 과정 없이 동작하는 정적 HTML/CSS/JavaScript 사이트입니다. 홈페이지 콘텐츠는 Supabase에 저장되며, 운영자는 Git이나 코드를 사용하지 않고 `홈페이지주소/admin/`에서 관리합니다.
+
+## 운영 방식
+
+| 작업 | 사용하는 곳 |
+|---|---|
+| 강좌 추가·수정·삭제 | `/admin/`의 `강좌 관리` |
+| 공지 등록·수정·삭제 | `/admin/`의 `공지 관리` |
+| 메인 슬라이드와 순서 | `/admin/`의 `슬라이드 관리` |
+| 교수진·후기·헤더·푸터·디자인 | Git 저장소 |
+
+- 개발자 최초 연결: [SUPABASE_SETUP.md](SUPABASE_SETUP.md)
+- 비전공자 관리자 사용법: [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
+
+Supabase가 아직 연결되지 않았거나 잠시 응답하지 않으면 `assets/app.js`의 기본 콘텐츠 또는 브라우저에 마지막으로 저장된 정상 데이터를 보여 줍니다.
 
 ## 빠른 실행
 
@@ -21,13 +35,27 @@ korea-kca/
 ├─ mock.html                  예전 mock.html 주소를 page.html로 연결
 ├─ assets/
 │  ├─ app.js                 강좌·공지 데이터, 슬라이드, 하위 페이지 렌더링
+│  ├─ content-store.js       Supabase 공개 조회·관리자 저장·오프라인 대체 처리
+│  ├─ config.js              Supabase Project URL과 공개 anon key
+│  ├─ admin.js               관리자 화면 동작과 이미지 자동 최적화
+│  ├─ admin.css              관리자 전용 스타일
 │  ├─ styles.css             공통/메인/하위/반응형 스타일
 │  ├─ gtcc-logo.png          헤더와 푸터 로고
 │  ├─ favicon.*              브라우저 탭 아이콘
 │  └─ hero-slides/
 │     └─ gtcc-slide-01.webp  메인 히어로 슬라이드 이미지
+├─ admin/index.html          관리자 로그인과 콘텐츠 관리 화면
+├─ supabase/schema.sql       데이터 표, 보안 정책, 변경 기록, 복구 함수
+├─ SUPABASE_SETUP.md         개발자용 최초 연결 방법
+├─ ADMIN_GUIDE.md            비전공자용 한 장 사용법
 └─ README.md
 ```
+
+## 콘텐츠 수정
+
+Supabase 연결 후에는 아래의 강좌, 해시태그, 공지, 슬라이드 수정을 코드로 하지 않습니다. `/admin/`에서 저장하면 메인 페이지, 목록, 필터와 상세 페이지에 함께 반영됩니다.
+
+이후 항목은 Supabase 장애 시 표시할 **저장소 기본 콘텐츠를 개발자가 직접 바꿔야 할 때만** 참고합니다.
 
 ## 수정 전 기본 원칙
 

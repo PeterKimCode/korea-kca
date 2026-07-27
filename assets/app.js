@@ -3,7 +3,7 @@ const KAKAO_URL = "https://open.kakao.com/o/pfJrLjVh";
 const CERTIFICATE_CHECK_URL = "https://www.kcqa.kr/";
 
 // 메인 히어로 슬라이드: gtcc-slide-01.webp부터 번호가 끊기지 않도록 저장하고 개수만 조정합니다.
-const HERO_SLIDES = Array.from({ length: 8 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.webp`);
+let HERO_SLIDES = Array.from({ length: 8 }, (_, index) => `assets/hero-slides/gtcc-slide-${String(index + 1).padStart(2, "0")}.webp`);
 
 // 공통 아이콘 원본입니다. 화면에서는 data-icon 속성 또는 icon() 함수로 불러옵니다.
 const icons = {
@@ -37,6 +37,14 @@ const icons = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   layers:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>',
+  courses:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg>',
+  notices:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+  slides:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m5 18 5-5 3 3 2-2 4 4"/></svg>',
+  help:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.5 2.5 0 1 1 3.4 2.3c-.8.3-1.2.8-1.2 1.7M12 17h.01"/></svg>',
 };
 
 /*
@@ -44,7 +52,7 @@ const icons = {
  * 각 항목 형식: ["강좌명", "분야 설명", "이미지"]
  * 이미지는 Unsplash 사진 ID, assets 내부 경로, 또는 https 전체 주소를 사용할 수 있습니다.
  */
-const courseGroups = {
+let courseGroups = {
   popular: [
     ["AIST(도형)상담지도사", "상담교육", "assets/hero-slides/도형.png"],
     ["TESOL(테솔)지도자", "외국어교육", "assets/hero-slides/테솔.png"],
@@ -103,7 +111,7 @@ const courseGroups = {
 
 // 공지사항 목록 원본입니다. 형식: [번호, 제목, 작성자, "YYYY.MM.DD"]
 // 메인 화면의 최신 공지 4개는 index.html에도 있으므로 새 공지 등록 시 함께 갱신합니다.
-const noticeRows = [
+let noticeRows = [
   [16, "[신규 개설] TESOL(테솔) 과정안내", "GTCC평생교육원", "2026.07.13"],
   [15, "[신규 개설] 커피바리스타 과정안내", "GTCC평생교육원", "2026.07.03"],
   [14, "[신규 개설] 국제탐정사 과정안내", "GTCC평생교육원", "2026.06.19"],
@@ -116,10 +124,10 @@ const noticeRows = [
   [7, "[신규 개설] 스마트스토어마케팅전문가 1급 과정 안내", "GTCC평생교육원", "2026.04.14"],
 ];
 
-const flatCourses = Object.values(courseGroups).flat();
+let flatCourses = Object.values(courseGroups).flat();
 
 // 전체강좌 필터에 사용하는 해시태그입니다. 키는 courseGroups의 강좌명과 정확히 같아야 합니다.
-const courseTagMap = {
+let courseTagMap = {
   "방송미디어전문지도사": ["방송", "국제"],
   "AIST(도형)상담지도사": ["상담", "국제"],
   "TESOL(테솔)지도자": ["교육", "외국어"],
@@ -166,6 +174,82 @@ const courseTagMap = {
   "코딩지도사": ["디지털", "교육"],
 };
 
+const DEFAULT_CURRICULUM = ["과정 이해", "핵심 이론", "현장 사례", "실무 체크리스트", "평가 대비", "자격 발급 안내"];
+let courseDetailsMap = {};
+let noticeDetailsMap = {};
+
+function buildDefaultContent() {
+  const seenSlugs = new Set();
+  const courses = [];
+  Object.entries(courseGroups).forEach(([groupKey, rows]) => {
+    rows.forEach(([title, category, imageUrl], index) => {
+      const slug = slugify(title);
+      if (seenSlugs.has(slug)) return;
+      seenSlugs.add(slug);
+      courses.push({
+        slug,
+        title,
+        category,
+        group_key: groupKey,
+        image_url: imageUrl,
+        tags: getCourseTags(title, category),
+        summary: "기초 개념부터 현장에서 바로 쓰는 실무 흐름까지 4주 안에 정리하는 온라인 자격 과정입니다.",
+        curriculum: DEFAULT_CURRICULUM,
+        duration: "4주",
+        exam_type: "온라인시험",
+        benefit_label: "장학지원",
+        sort_order: index,
+        published: true,
+      });
+    });
+  });
+  return {
+    courses,
+    notices: noticeRows.map(([number, title, author, date]) => ({
+      number,
+      title,
+      body: "해당 과정의 수강 신청, 학습자료, 시험 응시, 자격증 발급 안내가 업데이트되었습니다. 자세한 상담이 필요하신 경우 고객센터 문의 버튼을 이용해 주세요.",
+      author,
+      published_at: date.replaceAll(".", "-"),
+      published: true,
+    })),
+    slides: HERO_SLIDES.map((imageUrl, index) => ({
+      image_url: imageUrl,
+      alt_text: `GTCC대학교평생교육원 과정 이미지 ${index + 1}`,
+      sort_order: index,
+      published: true,
+    })),
+  };
+}
+
+// 관리자 화면의 초기 데이터 가져오기와 서버 장애 시 기본 콘텐츠로 사용합니다.
+window.GTCC_DEFAULT_CONTENT = buildDefaultContent();
+
+function applyContentData(content) {
+  const nextGroups = { popular: [], new: [], middle: [], career: [], pass: [] };
+  const nextTags = {};
+  const nextDetails = {};
+  (content.courses || []).forEach((course) => {
+    const groupKey = nextGroups[course.group_key] ? course.group_key : "popular";
+    nextGroups[groupKey].push([course.title, course.category, course.image_url]);
+    nextTags[course.title] = Array.isArray(course.tags) ? course.tags : [];
+    nextDetails[course.title] = course;
+  });
+  courseGroups = nextGroups;
+  courseTagMap = nextTags;
+  courseDetailsMap = nextDetails;
+  flatCourses = Object.values(courseGroups).flat();
+
+  noticeDetailsMap = {};
+  noticeRows = (content.notices || []).map((notice) => {
+    const number = Number(notice.number);
+    noticeDetailsMap[number] = notice;
+    return [number, notice.title, notice.author, String(notice.published_at || "").replaceAll("-", ".")];
+  });
+
+  HERO_SLIDES = (content.slides || []).map((slide) => slide.image_url);
+}
+
 function icon(name) {
   return `<span class="icon">${icons[name] || icons.book}</span>`;
 }
@@ -181,6 +265,10 @@ function initHeroSlider() {
   const slider = document.querySelector("[data-hero-slider]");
   if (!slider || slider.dataset.ready === "true") return;
   slider.dataset.ready = "true";
+  if (!HERO_SLIDES.length) {
+    slider.innerHTML = '<div class="hero-slide-empty"><img src="assets/gtcc-logo.png" alt="GTCC대학교평생교육원" /></div>';
+    return;
+  }
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   slider.innerHTML = `
     <div class="hero-slide-stage">
@@ -271,19 +359,22 @@ function courseImageUrl(imageSource, width = 520) {
 }
 
 function tagMarkup(tags) {
-  return `<div class="course-tags">${tags.map((tag) => `<span>#${tag}</span>`).join("")}</div>`;
+  return `<div class="course-tags">${tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join("")}</div>`;
 }
 
 function createCourseCard([title, category, imageId]) {
   const tags = getCourseTags(title, category);
+  const details = courseDetailsMap[title] || {};
+  const href = escapeHtml(courseHref(title));
+  const imageUrl = escapeHtml(courseImageUrl(imageId));
   return `
-    <article class="course-card" data-href="${courseHref(title)}" role="link" tabindex="0" draggable="false">
-      <img src="${courseImageUrl(imageId)}" alt="${title}" loading="lazy" draggable="false" />
-      <span>${category}</span>
-      <strong>${title}</strong>
+    <article class="course-card" data-href="${href}" role="link" tabindex="0" draggable="false">
+      <img src="${imageUrl}" alt="${escapeHtml(title)}" loading="lazy" draggable="false" />
+      <span>${escapeHtml(category)}</span>
+      <strong>${escapeHtml(title)}</strong>
       ${tagMarkup(tags)}
-      <small>수강기간 4주 · 온라인시험</small>
-      <em>장학지원</em>
+      <small>수강기간 ${escapeHtml(details.duration || "4주")} · ${escapeHtml(details.exam_type || "온라인시험")}</small>
+      <em>${escapeHtml(details.benefit_label || "장학지원")}</em>
     </article>
   `;
 }
@@ -373,6 +464,17 @@ function initHomeCourseRows() {
   }
 }
 
+function renderHomeNotices() {
+  const container = document.querySelector("[data-home-notices]");
+  if (!container) return;
+  container.innerHTML = `
+    <h2>공지사항</h2>
+    ${noticeRows.slice(0, 4).map(([number, title, , date]) => `
+      <a href="page.html?page=notice-${number}"><span>${escapeHtml(title)}</span><time>${escapeHtml(date)}</time></a>
+    `).join("")}
+  `;
+}
+
 function getParams() {
   return new URLSearchParams(window.location.search);
 }
@@ -444,21 +546,23 @@ function renderCourseDetail(title) {
   const course = getCourseByTitle(title) || [title, "온라인 자격 과정", "photo-1552664730-d307ca884978"];
   const [courseTitle, category, imageId] = course;
   const tags = getCourseTags(courseTitle, category);
-  const curriculum = ["과정 이해", "핵심 이론", "현장 사례", "실무 체크리스트", "평가 대비", "자격 발급 안내"];
+  const details = courseDetailsMap[courseTitle] || {};
+  const curriculum = Array.isArray(details.curriculum) && details.curriculum.length ? details.curriculum : DEFAULT_CURRICULUM;
+  const summary = details.summary || "기초 개념부터 현장에서 바로 쓰는 실무 흐름까지 4주 안에 정리하는 온라인 자격 과정입니다.";
   return `
     <section class="course-detail-shell">
       <article class="course-intro-hero">
         <div class="course-intro-copy">
-          <span class="eyebrow">${category}</span>
-          <h1>${courseTitle}</h1>
-          <p>기초 개념부터 현장에서 바로 쓰는 실무 흐름까지 4주 안에 정리하는 온라인 자격 과정입니다.</p>
+          <span class="eyebrow">${escapeHtml(category)}</span>
+          <h1>${escapeHtml(courseTitle)}</h1>
+          <p>${escapeHtml(summary)}</p>
           ${tagMarkup(tags)}
           <div class="hero-actions">
             <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 수강 상담</a>
             <a class="ghost-btn" href="page.html?page=certificates">${icon("certificate")} 발급 절차</a>
           </div>
         </div>
-        <img src="${courseImageUrl(imageId, 960)}" alt="${courseTitle} 과정 이미지" />
+        <img src="${escapeHtml(courseImageUrl(imageId, 960))}" alt="${escapeHtml(courseTitle)} 과정 이미지" />
       </article>
 
       <div class="course-intro-grid">
@@ -471,15 +575,15 @@ function renderCourseDetail(title) {
           <div class="course-outline">
             <h2>과정 구성</h2>
             <ol>
-              ${curriculum.map((item, index) => `<li><span>${String(index + 1).padStart(2, "0")}</span><strong>${item}</strong><p>${courseTitle} 학습에 필요한 핵심 내용을 단계별로 확인합니다.</p></li>`).join("")}
+              ${curriculum.map((item, index) => `<li><span>${String(index + 1).padStart(2, "0")}</span><strong>${escapeHtml(item)}</strong><p>${escapeHtml(courseTitle)} 학습에 필요한 핵심 내용을 단계별로 확인합니다.</p></li>`).join("")}
             </ol>
           </div>
         </section>
 
         <aside class="intro-side">
           <div class="course-summary">
-            <article>${icon("clock")}<strong>학습기간</strong><span>4주 온라인 수강</span></article>
-            <article>${icon("monitor")}<strong>평가방식</strong><span>온라인 시험</span></article>
+            <article>${icon("clock")}<strong>학습기간</strong><span>${escapeHtml(details.duration || "4주")} 온라인 수강</span></article>
+            <article>${icon("monitor")}<strong>평가방식</strong><span>${escapeHtml(details.exam_type || "온라인시험")}</span></article>
             <article>${icon("certificate")}<strong>수료혜택</strong><span>자격 발급 안내</span></article>
           </div>
           <div class="contact-panel compact-panel">
@@ -577,12 +681,12 @@ function renderNotice() {
           <div class="board-line"></div>
           <nav><a href="index.html">홈</a><span>/</span><strong>공지사항</strong></nav>
         </div>
-        <p class="board-count">공지사항 16건이 있습니다.</p>
+        <p class="board-count">공지사항 ${noticeRows.length}건이 있습니다.</p>
         <div class="notice-table-wrap">
           <table class="notice-table">
             <thead><tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일</th></tr></thead>
             <tbody>
-              ${noticeRows.map(([number, title, writer, date]) => `<tr><td>${number}</td><td><a href="page.html?page=notice-${number}">${title}</a></td><td>${writer}</td><td>${date}</td></tr>`).join("")}
+              ${noticeRows.map(([number, title, writer, date]) => `<tr><td>${number}</td><td><a href="page.html?page=notice-${number}">${escapeHtml(title)}</a></td><td>${escapeHtml(writer)}</td><td>${escapeHtml(date)}</td></tr>`).join("")}
             </tbody>
           </table>
         </div>
@@ -595,15 +699,33 @@ function renderNotice() {
 function renderNoticeArticle(page) {
   const number = Number(page.replace("notice-", ""));
   const row = noticeRows.find(([id]) => id === number) || noticeRows[0];
+  const details = noticeDetailsMap[number] || {};
+  const body = details.body || "해당 과정의 수강 신청, 학습자료, 시험 응시, 자격증 발급 안내가 업데이트되었습니다. 자세한 상담이 필요하신 경우 고객센터 문의 버튼을 이용해 주세요.";
   return `
     ${pageHero("공지사항", "Notice", "GTCC대학교 평생교육원의 과정 및 운영 안내입니다.")}
     <section class="article-shell">
-      <h2>${row[1]}</h2>
-      <dl><div><dt>작성자</dt><dd>${row[2]}</dd></div><div><dt>작성일</dt><dd>${row[3]}</dd></div></dl>
-      <p>해당 과정의 수강 신청, 학습자료, 시험 응시, 자격증 발급 안내가 업데이트되었습니다. 자세한 상담이 필요하신 경우 고객센터 문의 버튼을 이용해 주세요.</p>
+      <h2>${escapeHtml(row[1])}</h2>
+      <dl><div><dt>작성자</dt><dd>${escapeHtml(row[2])}</dd></div><div><dt>작성일</dt><dd>${escapeHtml(row[3])}</dd></div></dl>
+      <div class="notice-article-body">${plainTextMarkup(body)}</div>
       <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
     </section>
   `;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function plainTextMarkup(value) {
+  return escapeHtml(value)
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${paragraph.replaceAll("\n", "<br />")}</p>`)
+    .join("");
 }
 
 function renderSimplePage(title, text, iconName = "book") {
@@ -672,7 +794,17 @@ function renderPage() {
 }
 
 // index.html과 page.html이 같은 스크립트를 사용하므로, 존재하는 영역만 선택적으로 초기화합니다.
-initializeIcons();
-initHeroSlider();
-initHomeCourseRows();
-renderPage();
+async function bootPublicSite() {
+  initializeIcons();
+  const store = window.GTCCContentStore;
+  const content = store
+    ? await store.loadPublicContent(window.GTCC_DEFAULT_CONTENT)
+    : window.GTCC_DEFAULT_CONTENT;
+  applyContentData(content);
+  initHeroSlider();
+  initHomeCourseRows();
+  renderHomeNotices();
+  renderPage();
+}
+
+bootPublicSite();

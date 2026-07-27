@@ -593,11 +593,6 @@ function renderCourseDetail(title) {
 
       <div class="course-intro-grid">
         <section class="intro-main">
-          <div class="intro-block">
-            <span>Course Overview</span>
-            <h2>이런 분께 추천합니다</h2>
-            <p>관련 분야 입문자, 재취업을 준비하는 학습자, 현재 업무에 자격 기반 역량을 더하고 싶은 분들이 부담 없이 시작할 수 있도록 구성했습니다.</p>
-          </div>
           <div class="course-outline">
             <h2>과정 구성</h2>
             <ol>

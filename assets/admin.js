@@ -503,10 +503,10 @@
     elements.historyButton.addEventListener("click", openHistory);
     document.getElementById("helpButton").addEventListener("click", () => elements.helpDialog.showModal());
     elements.importButton.addEventListener("click", async () => {
-      if (!window.confirm("현재 홈페이지의 기본 강좌, 공지, 슬라이드 내용을 관리자 서버로 가져올까요? 최초 한 번만 실행합니다.")) return;
+      if (!window.confirm("기존 내용은 그대로 두고, 등록되지 않은 기본 강좌·공지·슬라이드만 가져올까요?")) return;
       try {
-        await store.importDefaults(window.GTCC_DEFAULT_CONTENT);
-        showToast("기본 내용을 가져왔습니다.");
+        const result = await store.importDefaults(window.GTCC_DEFAULT_CONTENT);
+        showToast(`기존 내용은 유지하고 기본 데이터 ${result.total}개를 추가했습니다.`);
         await loadItems();
       } catch (error) {
         showToast(error.message, true);

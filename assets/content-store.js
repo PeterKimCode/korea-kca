@@ -284,18 +284,32 @@
 
   async function importDefaults(content) {
     const session = await requireSession();
-    const existing = await Promise.all(["courses", "notices", "slides"].map((entity) => (
-      request(`/rest/v1/${entity}?select=id&limit=1`, { token: session.access_token })
-    )));
-    if (existing.some((rows) => rows.length)) throw new Error("이미 콘텐츠가 있어 기본 데이터 가져오기를 중단했습니다.");
-    const imported = {};
+    const [existingCourses, existingNotices, existingSlides] = await Promise.all([
+      request("/rest/v1/courses?select=id,slug", { token: session.access_token }),
+      request("/rest/v1/notices?select=id,number", { token: session.access_token }),
+      request("/rest/v1/slides?select=id,image_url", { token: session.access_token }),
+    ]);
+    const existingKeys = {
+      courses: new Set(existingCourses.map((row) => String(row.slug).toLocaleLowerCase("ko-KR"))),
+      notices: new Set(existingNotices.map((row) => String(row.number))),
+      slides: new Set(existingSlides.map((row) => String(row.image_url))),
+    };
+    const missingContent = {
+      courses: (content.courses || []).filter((row) => !existingKeys.courses.has(String(row.slug).toLocaleLowerCase("ko-KR"))),
+      notices: (content.notices || []).filter((row) => !existingKeys.notices.has(String(row.number))),
+      slides: (content.slides || []).filter((row) => !existingKeys.slides.has(String(row.image_url))),
+    };
+    const imported = { courses: [], notices: [], slides: [], total: 0 };
+
     for (const entity of ["courses", "notices", "slides"]) {
+      if (!missingContent[entity].length) continue;
       imported[entity] = await request(`/rest/v1/${entity}`, {
         method: "POST",
         token: session.access_token,
         headers: { Prefer: "return=representation" },
-        body: JSON.stringify(content[entity]),
+        body: JSON.stringify(missingContent[entity]),
       });
+      imported.total += imported[entity].length;
       if (entity === "notices") {
         await request("/rest/v1/rpc/sync_notice_number_sequence", {
           method: "POST",
@@ -304,6 +318,7 @@
         });
       }
     }
+    if (!imported.total) throw new Error("기본 데이터가 모두 등록되어 있어 추가할 내용이 없습니다.");
     return imported;
   }
 

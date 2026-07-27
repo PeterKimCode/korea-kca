@@ -175,8 +175,21 @@ let courseTagMap = {
 };
 
 const DEFAULT_CURRICULUM = ["과정 이해", "핵심 이론", "현장 사례", "실무 체크리스트", "평가 대비", "자격 발급 안내"];
+const CATALOG_TAG_PRIORITY = ["돌봄", "상담", "디지털", "안전", "문화"];
 let courseDetailsMap = {};
 let noticeDetailsMap = {};
+
+function normalizeCourseTags(tags) {
+  const seen = new Set();
+  return (Array.isArray(tags) ? tags : [])
+    .map((tag) => String(tag || "").trim().replace(/^#+/, "").trim())
+    .filter((tag) => {
+      const key = tag.toLocaleLowerCase("ko-KR");
+      if (!tag || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
 
 function buildDefaultContent() {
   const seenSlugs = new Set();
@@ -232,7 +245,7 @@ function applyContentData(content) {
   (content.courses || []).forEach((course) => {
     const groupKey = nextGroups[course.group_key] ? course.group_key : "popular";
     nextGroups[groupKey].push([course.title, course.category, course.image_url]);
-    nextTags[course.title] = Array.isArray(course.tags) ? course.tags : [];
+    nextTags[course.title] = normalizeCourseTags(course.tags);
     nextDetails[course.title] = course;
   });
   courseGroups = nextGroups;
@@ -345,7 +358,19 @@ function courseHref(title) {
 }
 
 function getCourseTags(title, category = "") {
-  return courseTagMap[title] || [category.replace(/전문가|전문|교육|관리/g, "").slice(0, 4) || "자격"];
+  const tags = courseTagMap[title] || [category.replace(/전문가|전문|교육|관리/g, "").slice(0, 4) || "자격"];
+  return normalizeCourseTags(tags);
+}
+
+function getCatalogCategories() {
+  const allTags = normalizeCourseTags(
+    flatCourses.flatMap(([title, category]) => getCourseTags(title, category)),
+  );
+  const priorityTags = CATALOG_TAG_PRIORITY.filter((tag) => allTags.includes(tag));
+  const remainingTags = allTags
+    .filter((tag) => !CATALOG_TAG_PRIORITY.includes(tag))
+    .sort((left, right) => left.localeCompare(right, "ko-KR"));
+  return ["전체", ...priorityTags, ...remainingTags];
 }
 
 function getCourseByTitle(title) {
@@ -515,10 +540,11 @@ function pageHero(title, eyebrow, text) {
 }
 
 function renderCatalog(query = "", categoryParam = "") {
-  // category 쿼리와 courseTagMap을 대조해 해당 태그의 강좌만 표시합니다.
+  // 공개 강좌에 실제로 사용된 모든 태그를 필터로 자동 생성합니다.
   const normalized = query.trim().toLowerCase();
-  const selectedCategory = categoryParam || "전체";
-  const categories = ["전체", "돌봄", "상담", "디지털", "안전", "문화"];
+  const categories = getCatalogCategories();
+  const requestedCategory = String(categoryParam || "").trim().replace(/^#+/, "");
+  const selectedCategory = categories.includes(requestedCategory) ? requestedCategory : "전체";
   const courses = flatCourses.filter(([title, category]) => {
     const tags = getCourseTags(title, category);
     const searchable = `${title} ${category} ${tags.join(" ")}`.toLowerCase();

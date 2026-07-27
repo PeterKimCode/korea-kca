@@ -61,6 +61,19 @@
       .replace(/^-|-$/g, "");
   }
 
+  function normalizeTags(value) {
+    const seen = new Set();
+    return String(value || "")
+      .split(",")
+      .map((tag) => tag.trim().replace(/^#+/, "").trim())
+      .filter((tag) => {
+        const key = tag.toLocaleLowerCase("ko-KR");
+        if (!tag || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
   function formatDate(value) {
     if (!value) return "";
     return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: value.includes("T") ? "short" : undefined }).format(new Date(value));
@@ -92,9 +105,15 @@
     try {
       state.items = await store.list(state.entity, { deleted: state.deleted });
       renderList();
-      elements.dataStatus.textContent = state.deleted
-        ? `휴지통에 ${state.items.length}개가 있습니다.`
-        : `현재 ${state.items.length}개가 등록되어 있습니다.`;
+      if (state.deleted) {
+        elements.dataStatus.textContent = `휴지통에 ${state.items.length}개가 있습니다.`;
+      } else {
+        const publishedCount = state.items.filter((item) => item.published).length;
+        elements.dataStatus.textContent = `현재 ${state.items.length}개가 등록되어 있고 ${publishedCount}개가 홈페이지에 공개 중입니다.`;
+        if (state.items.length && publishedCount === 0) {
+          elements.dataStatus.textContent += " 수정 화면에서 '홈페이지에 공개'를 확인해 주세요.";
+        }
+      }
     } catch (error) {
       elements.contentList.innerHTML = `<div class="empty-state">내용을 불러오지 못했습니다.<br />${escapeHtml(error.message)}</div>`;
       elements.dataStatus.textContent = "";
@@ -292,7 +311,7 @@
         title: String(data.get("title")).trim(),
         category: String(data.get("category")).trim(),
         group_key: data.get("group_key"),
-        tags: String(data.get("tags")).split(",").map((tag) => tag.trim().replace(/^#/, "")).filter(Boolean),
+        tags: normalizeTags(data.get("tags")),
         summary: String(data.get("summary")).trim(),
         curriculum: String(data.get("curriculum")).split("\n").map((line) => line.trim()).filter(Boolean),
         duration: String(data.get("duration")).trim(),

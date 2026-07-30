@@ -13,7 +13,7 @@
 
 이미 운영 중인 홈페이지에 공지 이미지·링크 기능만 추가할 때는 `supabase/notice-media-migration.sql` 전체를 `SQL Editor`에서 한 번 실행합니다.
 
-이미 운영 중인 홈페이지에 교재 관리 기능을 추가할 때는 `supabase/book-catalog-migration.sql` 전체를 `SQL Editor`에서 한 번 실행합니다. 새로 `schema.sql` 전체를 실행한 프로젝트에는 별도로 실행할 필요가 없습니다.
+이미 운영 중인 홈페이지에 교재 관리 기능을 추가할 때는 `supabase/book-catalog-migration.sql` 전체를 `SQL Editor`에 붙여 넣고 `Ctrl+A`로 전부 선택한 뒤 `Run`을 한 번 누릅니다. Supabase가 별도의 `Enable RLS` 문장을 제안해도 추가하지 않습니다. 새로 `schema.sql` 전체를 실행한 프로젝트에는 별도로 실행할 필요가 없습니다.
 
 ## 2. 관리자 계정 두 개 만들기
 

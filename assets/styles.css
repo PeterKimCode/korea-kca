@@ -175,6 +175,101 @@ img {
   font-weight: 800;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.translation-control {
+  position: relative;
+}
+
+.translation-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.translation-toggle:hover,
+.translation-toggle:focus-visible,
+.translation-toggle[aria-expanded="true"] {
+  border-color: var(--wine);
+  color: var(--wine);
+  outline: 0;
+}
+
+.translation-toggle .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.translation-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1100;
+  width: 150px;
+  padding: 6px;
+  border: 1px solid #d8e0eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 36px rgba(15, 27, 45, 0.16);
+}
+
+.translation-menu[hidden] {
+  display: none;
+}
+
+.translation-menu button {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+
+.translation-menu button:hover,
+.translation-menu button:focus-visible {
+  background: #f5f7fb;
+  color: var(--wine);
+  outline: 0;
+}
+
+.google-translate-host {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+body > .skiptranslate,
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
 .kakao-link,
 .primary-btn {
   border: 1px solid var(--wine);
@@ -2053,7 +2148,16 @@ img {
     width: min(100% - 24px, 1120px);
   }
 
-  .kakao-link {
+  .header-actions {
+    order: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .translation-control,
+  .translation-toggle,
+  .header-actions .kakao-link {
     width: 100%;
   }
 

@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon-192.png" />
     <link rel="preconnect" href="https://images.unsplash.com" />
-    <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260730" />
   </head>
   <body>
     <!-- 공통 헤더: index.html과 구조를 맞춰야 하며, 현황 문구 변경 시 반복된 3세트를 모두 수정합니다. -->
@@ -64,10 +64,26 @@
           <button type="submit" aria-label="검색"><span data-icon="search"></span></button>
         </form>
 
-        <a class="kakao-link" href="page.html?page=lms">
-          <span data-icon="monitor"></span>
-          LMS
-        </a>
+        <div class="header-actions">
+          <div class="translation-control">
+            <button class="translation-toggle" type="button" data-translation-toggle aria-expanded="false">
+              <span data-icon="globe"></span>
+              번역
+            </button>
+            <div class="translation-menu" data-translation-menu hidden>
+              <button type="button" data-translate-language="ko">한국어</button>
+              <button type="button" data-translate-language="en">English</button>
+              <button type="button" data-translate-language="ja">日本語</button>
+              <button type="button" data-translate-language="zh-CN">中文</button>
+              <button type="button" data-translate-language="tl">Filipino</button>
+            </div>
+            <div id="google_translate_element" class="google-translate-host" aria-hidden="true"></div>
+          </div>
+          <a class="kakao-link" href="page.html?page=lms">
+            <span data-icon="monitor"></span>
+            LMS
+          </a>
+        </div>
       </div>
 
       <nav class="main-nav" aria-label="주요 메뉴">
@@ -111,6 +127,7 @@
 
     <script src="assets/config.js?v=20260727"></script>
     <script src="assets/content-store.js?v=20260727-2"></script>
-    <script src="assets/app.js?v=20260727-3"></script>
+    <script src="assets/app.js?v=20260730"></script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   </body>
 </html>

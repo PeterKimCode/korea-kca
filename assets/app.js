@@ -45,6 +45,8 @@ const icons = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m5 18 5-5 3 3 2-2 4 4"/></svg>',
   help:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.5 2.5 0 1 1 3.4 2.3c-.8.3-1.2.8-1.2 1.7M12 17h.01"/></svg>',
+  globe:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.8 5.5-3.8 9s1.3 6.5 3.8 9"/></svg>',
 };
 
 /*
@@ -360,6 +362,69 @@ function courseHref(title) {
 function getCourseTags(title, category = "") {
   const tags = courseTagMap[title] || [category.replace(/전문가|전문|교육|관리/g, "").slice(0, 4) || "자격"];
   return normalizeCourseTags(tags);
+}
+
+// Google 번역 기본 선택창은 숨기고, 헤더의 통일된 언어 메뉴로 제어합니다.
+window.googleTranslateElementInit = function googleTranslateElementInit() {
+  if (!window.google?.translate?.TranslateElement) return;
+  new window.google.translate.TranslateElement({
+    pageLanguage: "ko",
+    includedLanguages: "ko,en,ja,zh-CN,tl",
+    autoDisplay: false,
+  }, "google_translate_element");
+};
+
+function setTranslationCookie(language) {
+  const value = language === "ko" ? "" : `/ko/${language}`;
+  const expires = language === "ko" ? ";expires=Thu, 01 Jan 1970 00:00:00 GMT" : "";
+  document.cookie = `googtrans=${value};path=/${expires}`;
+  if (window.location.hostname.includes(".")) {
+    document.cookie = `googtrans=${value};path=/;domain=.${window.location.hostname}${expires}`;
+  }
+}
+
+function applyTranslation(language) {
+  if (language === "ko") {
+    setTranslationCookie("ko");
+    window.location.reload();
+    return;
+  }
+  const select = document.querySelector(".goog-te-combo");
+  if (select) {
+    select.value = language;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+  setTranslationCookie(language);
+  window.location.reload();
+}
+
+function initTranslationMenu() {
+  const toggle = document.querySelector("[data-translation-toggle]");
+  const menu = document.querySelector("[data-translation-menu]");
+  if (!toggle || !menu) return;
+
+  const closeMenu = () => {
+    menu.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+  };
+  toggle.addEventListener("click", () => {
+    const willOpen = menu.hidden;
+    menu.hidden = !willOpen;
+    toggle.setAttribute("aria-expanded", String(willOpen));
+  });
+  menu.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-translate-language]");
+    if (!button) return;
+    closeMenu();
+    applyTranslation(button.dataset.translateLanguage);
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".translation-control")) closeMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenu();
+  });
 }
 
 function getCatalogCategories() {
@@ -817,6 +882,7 @@ function renderPage() {
 // index.html과 page.html이 같은 스크립트를 사용하므로, 존재하는 영역만 선택적으로 초기화합니다.
 async function bootPublicSite() {
   initializeIcons();
+  initTranslationMenu();
   const store = window.GTCCContentStore;
   const content = store
     ? await store.loadPublicContent(window.GTCC_DEFAULT_CONTENT)

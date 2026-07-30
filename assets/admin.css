@@ -10,6 +10,12 @@
   --admin-paper: #fff;
   --admin-success: #14735b;
   --admin-danger: #b42318;
+  /* 관리자 화면도 공개 홈페이지와 같은 반응 속도를 사용합니다. */
+  --admin-motion-fast: 160ms;
+  --admin-motion-base: 220ms;
+  --admin-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --admin-focus-ring: 0 0 0 4px rgba(143, 23, 52, 0.14);
+  --admin-card-shadow: 0 14px 30px rgba(19, 32, 51, 0.1);
 }
 
 * {
@@ -158,16 +164,28 @@ img {
   border-radius: 6px;
   font-weight: 900;
   text-decoration: none;
+  transition:
+    color var(--admin-motion-fast) ease,
+    border-color var(--admin-motion-fast) ease,
+    background-color var(--admin-motion-fast) ease,
+    background-position var(--admin-motion-base) var(--admin-ease),
+    box-shadow var(--admin-motion-base) var(--admin-ease),
+    transform var(--admin-motion-fast) var(--admin-ease);
 }
 
 .admin-primary {
   border: 1px solid var(--admin-wine);
   background: var(--admin-wine);
+  background-image: linear-gradient(
+    110deg,
+    var(--admin-navy) 0%,
+    var(--admin-navy) 42%,
+    var(--admin-wine-dark) 72%,
+    #805b2c 100%
+  );
+  background-position: 0% 50%;
+  background-size: 240% 100%;
   color: #fff;
-}
-
-.admin-primary:hover {
-  background: var(--admin-wine-dark);
 }
 
 .admin-secondary {
@@ -307,6 +325,12 @@ img {
   color: var(--admin-navy);
   font-size: 18px;
   font-weight: 900;
+  transition:
+    color var(--admin-motion-fast) ease,
+    border-color var(--admin-motion-fast) ease,
+    background-color var(--admin-motion-fast) ease,
+    box-shadow var(--admin-motion-base) var(--admin-ease),
+    transform var(--admin-motion-fast) var(--admin-ease);
 }
 
 .admin-icon-button .icon,
@@ -359,6 +383,12 @@ img {
   background: transparent;
   color: var(--admin-ink);
   text-align: left;
+  transition:
+    color var(--admin-motion-fast) ease,
+    border-color var(--admin-motion-fast) ease,
+    background-color var(--admin-motion-fast) ease,
+    box-shadow var(--admin-motion-base) var(--admin-ease),
+    transform var(--admin-motion-fast) var(--admin-ease);
 }
 
 .admin-nav:hover,
@@ -380,6 +410,9 @@ img {
   background: var(--admin-navy);
   color: #fff;
   font-weight: 900;
+  transition:
+    background-color var(--admin-motion-fast) ease,
+    transform var(--admin-motion-base) var(--admin-ease);
 }
 
 .admin-nav.is-active .nav-symbol {
@@ -482,6 +515,10 @@ img {
   border: 1px solid var(--admin-line);
   border-radius: 8px;
   background: #fff;
+  transition:
+    border-color var(--admin-motion-base) ease,
+    box-shadow var(--admin-motion-base) var(--admin-ease),
+    transform var(--admin-motion-base) var(--admin-ease);
 }
 
 .admin-list-item.no-image {
@@ -494,6 +531,9 @@ img {
   border-radius: 6px;
   object-fit: cover;
   background: #e8edf3;
+  transition:
+    filter var(--admin-motion-base) ease,
+    transform var(--admin-motion-base) var(--admin-ease);
 }
 
 .item-copy {
@@ -803,6 +843,92 @@ img {
   background: var(--admin-danger);
 }
 
+/* ===== 관리자 인터랙션 효과 =====
+   저장 버튼은 브랜드 그라디언트, 삭제 버튼은 명확한 위험 색상을 유지합니다. */
+@media (hover: hover) and (pointer: fine) {
+  .admin-primary:hover {
+    border-color: #805b2c;
+    background-position: 100% 50%;
+    box-shadow: 0 10px 22px rgba(19, 32, 51, 0.2);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .admin-secondary:hover,
+  .admin-icon-button:hover,
+  .dialog-close:hover {
+    border-color: rgba(143, 23, 52, 0.42);
+    background: #fff6f8;
+    color: var(--admin-wine);
+    box-shadow: 0 8px 18px rgba(19, 32, 51, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .admin-danger:hover {
+    border-color: #e7a8a2;
+    background: #fee9e7;
+    box-shadow: 0 8px 18px rgba(180, 35, 24, 0.1);
+  }
+
+  .admin-text-button:hover,
+  .admin-text-link:hover {
+    color: var(--admin-wine-dark);
+  }
+
+  .admin-nav:hover {
+    box-shadow: 0 8px 18px rgba(19, 32, 51, 0.07);
+    transform: translateX(2px);
+  }
+
+  .admin-nav:hover .nav-symbol {
+    transform: scale(1.035);
+  }
+
+  .admin-list-item:hover {
+    border-color: rgba(143, 23, 52, 0.2);
+    box-shadow: var(--admin-card-shadow);
+    transform: translateY(-2px);
+  }
+
+  .admin-list-item:hover img {
+    filter: saturate(0.92) contrast(1.03);
+    transform: scale(1.02);
+  }
+}
+
+.admin-primary:active,
+.admin-secondary:active,
+.admin-danger:active,
+.admin-text-button:active,
+.admin-icon-button:active,
+.dialog-close:active,
+.admin-nav:active {
+  box-shadow: none;
+  transform: translateY(0) scale(0.985);
+}
+
+.admin-primary:focus-visible,
+.admin-secondary:focus-visible,
+.admin-danger:focus-visible,
+.admin-text-button:focus-visible,
+.admin-icon-button:focus-visible,
+.dialog-close:focus-visible,
+.admin-nav:focus-visible {
+  outline: 2px solid var(--admin-wine);
+  outline-offset: 3px;
+  box-shadow: var(--admin-focus-ring);
+}
+
+button:disabled,
+.admin-primary:disabled,
+.admin-secondary:disabled,
+.admin-danger:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 @media (max-width: 920px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -943,5 +1069,14 @@ img {
 @media (prefers-reduced-motion: reduce) {
   .admin-toast {
     transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

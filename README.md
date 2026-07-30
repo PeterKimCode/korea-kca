@@ -9,7 +9,8 @@
 | 강좌 추가·수정·삭제 | `/admin/`의 `강좌 관리` |
 | 공지 등록·수정·삭제 | `/admin/`의 `공지 관리` |
 | 메인 슬라이드와 순서 | `/admin/`의 `슬라이드 관리` |
-| 교수진·후기·헤더·푸터·디자인 | Git 저장소 |
+| 추천 교재와 구매 링크 | `/admin/`의 `교재 관리` |
+| 교수진·헤더·푸터·디자인 | Git 저장소 |
 
 - 개발자 최초 연결: [SUPABASE_SETUP.md](SUPABASE_SETUP.md)
 - 비전공자 관리자 사용법: [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
@@ -34,7 +35,7 @@ korea-kca/
 ├─ page.html                  모든 하위 페이지의 공통 헤더·푸터
 ├─ mock.html                  예전 mock.html 주소를 page.html로 연결
 ├─ assets/
-│  ├─ app.js                 강좌·공지 데이터, 슬라이드, 하위 페이지 렌더링
+│  ├─ app.js                 강좌·공지·교재 데이터, 슬라이드, 하위 페이지 렌더링
 │  ├─ content-store.js       Supabase 공개 조회·관리자 저장·오프라인 대체 처리
 │  ├─ config.js              Supabase Project URL과 공개 anon key
 │  ├─ admin.js               관리자 화면 동작과 이미지 자동 최적화
@@ -46,6 +47,7 @@ korea-kca/
 │     └─ gtcc-slide-01.webp  메인 히어로 슬라이드 이미지
 ├─ admin/index.html          관리자 로그인과 콘텐츠 관리 화면
 ├─ supabase/schema.sql       데이터 표, 보안 정책, 변경 기록, 복구 함수
+├─ supabase/book-catalog-migration.sql  기존 프로젝트용 교재 기능 추가 SQL
 ├─ SUPABASE_SETUP.md         개발자용 최초 연결 방법
 ├─ ADMIN_GUIDE.md            비전공자용 한 장 사용법
 └─ README.md
@@ -53,7 +55,7 @@ korea-kca/
 
 ## 콘텐츠 수정
 
-Supabase 연결 후에는 아래의 강좌, 해시태그, 공지, 슬라이드 수정을 코드로 하지 않습니다. `/admin/`에서 저장하면 메인 페이지, 목록, 필터와 상세 페이지에 함께 반영됩니다.
+Supabase 연결 후에는 아래의 강좌, 해시태그, 공지, 슬라이드, 교재 수정을 코드로 하지 않습니다. `/admin/`에서 저장하면 메인 페이지, 목록, 필터와 상세 페이지에 함께 반영됩니다.
 
 이후 항목은 Supabase 장애 시 표시할 **저장소 기본 콘텐츠를 개발자가 직접 바꿔야 할 때만** 참고합니다.
 
@@ -202,11 +204,10 @@ const noticeRows = [
 - `hero-copy`: 메인 문구와 버튼
 - `benefit-grid`: 장학, 온라인 학습, 자격 발급 안내
 - `faculty-section`: 교수진
-- `review-section`: 수강 후기
 - `news-section`: 교육원 소식
 - `notice-section`: 최신 공지와 고객센터
 
-강좌 카드 영역은 비어 있는 `data-course-row` 컨테이너만 두고 `assets/app.js`가 채우므로, 카드 내용을 HTML에 직접 추가하지 않습니다.
+강좌 카드와 추천 교재 영역은 비어 있는 컨테이너를 `assets/app.js`가 채우므로 HTML에 직접 카드를 추가하지 않습니다. 교재는 관리자 화면의 `교재 관리`에서 등록합니다.
 
 ## 하위 페이지 추가 및 수정
 

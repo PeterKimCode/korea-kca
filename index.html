@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon-192.png" />
     <link rel="preconnect" href="https://images.unsplash.com" />
-    <link rel="stylesheet" href="assets/styles.css?v=20260730-2" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260730-3" />
   </head>
   <body>
     <!-- 공통 헤더: page.html과 구조를 맞춰야 하며, 현황 문구 변경 시 반복된 3세트를 모두 수정합니다. -->
@@ -218,33 +218,13 @@
         </a>
       </section>
 
-      <section class="review-section">
+      <!-- 공개 중인 교재가 있을 때만 assets/app.js가 이 영역을 표시합니다. -->
+      <section class="book-section" data-book-section hidden>
         <div class="section-head stacked">
-          <p>#수강 후기</p>
-          <h2>학습자가 남긴 실제 후기</h2>
+          <p>#교재 구매</p>
+          <h2>학습에 필요한 추천 교재</h2>
         </div>
-        <div class="review-row">
-          <a class="review-card" href="page.html?page=review-1">
-            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=220&q=80" alt="온라인 학습 후기" />
-            <strong>일과 병행하기 좋았습니다</strong>
-            <p>강의가 짧게 나뉘어 있어 출퇴근 전후로 꾸준히 들을 수 있었습니다.</p>
-          </a>
-          <a class="review-card" href="page.html?page=review-2">
-            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=220&q=80" alt="수강생 후기" />
-            <strong>시험 준비 흐름이 명확했어요</strong>
-            <p>교안과 예상문제를 같이 보니 처음 접하는 과목도 부담이 줄었습니다.</p>
-          </a>
-          <a class="review-card" href="page.html?page=review-3">
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=220&q=80" alt="학습 커뮤니티 후기" />
-            <strong>자격증 발급 안내가 편했습니다</strong>
-            <p>수료 후 필요한 절차가 정리되어 있어 서류 준비가 수월했습니다.</p>
-          </a>
-          <a class="review-card" href="page.html?page=review-4">
-            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=220&q=80" alt="상담 후기" />
-            <strong>문의 응대가 빨랐습니다</strong>
-            <p>과정 선택 전에 필요한 내용을 바로 확인할 수 있어 등록 결정이 쉬웠습니다.</p>
-          </a>
-        </div>
+        <div class="book-row" data-book-row tabindex="0" aria-label="추천 교재 목록"></div>
       </section>
 
       <section class="news-section">
@@ -321,8 +301,8 @@
     </aside>
 
     <script src="assets/config.js?v=20260727"></script>
-    <script src="assets/content-store.js?v=20260727-2"></script>
-    <script src="assets/app.js?v=20260730-2"></script>
+    <script src="assets/content-store.js?v=20260730-3"></script>
+    <script src="assets/app.js?v=20260730-3"></script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   </body>
 </html>

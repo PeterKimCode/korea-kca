@@ -61,9 +61,23 @@ create table if not exists public.slides (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.books (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  description text not null default '',
+  image_url text not null,
+  purchase_url text not null,
+  sort_order integer not null default 0,
+  published boolean not null default true,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.content_history (
   id bigint generated always as identity primary key,
-  entity_type text not null check (entity_type in ('courses', 'notices', 'slides')),
+  entity_type text not null check (entity_type in ('courses', 'notices', 'slides', 'books')),
   entity_id uuid not null,
   action text not null check (action in ('insert', 'update', 'delete', 'restore')),
   before_data jsonb,
@@ -72,9 +86,16 @@ create table if not exists public.content_history (
   created_at timestamptz not null default now()
 );
 
+-- 기존 프로젝트의 변경 기록 제약조건에도 교재 유형을 추가합니다.
+alter table public.content_history drop constraint if exists content_history_entity_type_check;
+alter table public.content_history
+  add constraint content_history_entity_type_check
+  check (entity_type in ('courses', 'notices', 'slides', 'books'));
+
 create index if not exists courses_public_idx on public.courses (published, deleted_at, group_key, sort_order);
 create index if not exists notices_public_idx on public.notices (published, deleted_at, published_at desc);
 create index if not exists slides_public_idx on public.slides (published, deleted_at, sort_order);
+create index if not exists books_public_idx on public.books (published, deleted_at, sort_order);
 create index if not exists history_recent_idx on public.content_history (created_at desc);
 
 create or replace function public.is_gtcc_admin()
@@ -150,10 +171,18 @@ drop trigger if exists slides_audit on public.slides;
 create trigger slides_audit after insert or update on public.slides
 for each row execute function public.audit_content_change();
 
+drop trigger if exists books_touch_updated_at on public.books;
+create trigger books_touch_updated_at before update on public.books
+for each row execute function public.touch_updated_at();
+drop trigger if exists books_audit on public.books;
+create trigger books_audit after insert or update on public.books
+for each row execute function public.audit_content_change();
+
 alter table public.admin_users enable row level security;
 alter table public.courses enable row level security;
 alter table public.notices enable row level security;
 alter table public.slides enable row level security;
+alter table public.books enable row level security;
 alter table public.content_history enable row level security;
 
 drop policy if exists "admin users read own profile" on public.admin_users;
@@ -179,6 +208,13 @@ create policy "public reads published slides" on public.slides
 for select using (published = true and deleted_at is null);
 drop policy if exists "admins manage slides" on public.slides;
 create policy "admins manage slides" on public.slides
+for all using (public.is_gtcc_admin()) with check (public.is_gtcc_admin());
+
+drop policy if exists "public reads published books" on public.books;
+create policy "public reads published books" on public.books
+for select using (published = true and deleted_at is null);
+drop policy if exists "admins manage books" on public.books;
+create policy "admins manage books" on public.books
 for all using (public.is_gtcc_admin()) with check (public.is_gtcc_admin());
 
 drop policy if exists "admins read history" on public.content_history;
@@ -272,6 +308,18 @@ begin
       sort_order = excluded.sort_order,
       published = excluded.published,
       deleted_at = excluded.deleted_at;
+  elsif history_row.entity_type = 'books' then
+    insert into public.books
+    select * from jsonb_populate_record(null::public.books, history_row.before_data)
+    on conflict (id) do update set
+      slug = excluded.slug,
+      title = excluded.title,
+      description = excluded.description,
+      image_url = excluded.image_url,
+      purchase_url = excluded.purchase_url,
+      sort_order = excluded.sort_order,
+      published = excluded.published,
+      deleted_at = excluded.deleted_at;
   end if;
 end;
 $$;
@@ -311,6 +359,38 @@ $$;
 revoke all on function public.reorder_slides(uuid[]) from public;
 grant execute on function public.reorder_slides(uuid[]) to authenticated;
 
+-- 교재 순서를 한 번의 트랜잭션으로 변경합니다.
+create or replace function public.reorder_books(book_ids uuid[])
+returns setof public.books
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  book_id uuid;
+  book_position integer := 0;
+begin
+  if not public.is_gtcc_admin() then
+    raise exception '관리자 권한이 필요합니다.';
+  end if;
+
+  foreach book_id in array book_ids loop
+    update public.books
+    set sort_order = book_position * 10
+    where id = book_id and deleted_at is null;
+    book_position := book_position + 1;
+  end loop;
+
+  return query
+  select * from public.books
+  where id = any(book_ids) and deleted_at is null
+  order by sort_order;
+end;
+$$;
+
+revoke all on function public.reorder_books(uuid[]) from public;
+grant execute on function public.reorder_books(uuid[]) to authenticated;
+
 -- 기존 공지번호를 이관한 뒤 다음 자동 번호가 최댓값 다음부터 시작하게 맞춥니다.
 create or replace function public.sync_notice_number_sequence()
 returns void
@@ -348,6 +428,7 @@ begin
   delete from public.courses where deleted_at < now() - interval '30 days';
   delete from public.notices where deleted_at < now() - interval '30 days';
   delete from public.slides where deleted_at < now() - interval '30 days';
+  delete from public.books where deleted_at < now() - interval '30 days';
 end;
 $$;
 

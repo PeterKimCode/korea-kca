@@ -7,7 +7,7 @@
   const configured = /^https:\/\/.+\.supabase\.co$/.test(baseUrl) && anonKey.length > 20;
   const cacheKey = "gtcc-public-content-v1";
   const sessionKey = "gtcc-admin-session-v1";
-  const entityNames = new Set(["courses", "notices", "slides"]);
+  const entityNames = new Set(["courses", "notices", "slides", "books"]);
 
   function headers(token = "", extra = {}) {
     return {
@@ -69,11 +69,19 @@
         request("/rest/v1/notices?select=*&published=eq.true&deleted_at=is.null&order=published_at.desc,number.desc"),
         request("/rest/v1/slides?select=*&published=eq.true&deleted_at=is.null&order=sort_order.asc"),
       ]);
+      let books = [];
+      try {
+        books = await request("/rest/v1/books?select=*&published=eq.true&deleted_at=is.null&order=sort_order.asc");
+      } catch (error) {
+        // 교재 마이그레이션 전에도 기존 강좌·공지·슬라이드는 정상적으로 표시합니다.
+        console.warn("교재 데이터가 아직 준비되지 않았습니다.", error);
+      }
       const content = {
         // 비공개 또는 삭제로 빈 목록이 된 경우 기본 콘텐츠를 다시 노출하지 않습니다.
         courses,
         notices,
         slides,
+        books,
         source: "remote",
       };
       writeCache(content);
@@ -252,6 +260,15 @@
     });
   }
 
+  async function reorderBooks(bookIds) {
+    const session = await requireSession();
+    return request("/rest/v1/rpc/reorder_books", {
+      method: "POST",
+      token: session.access_token,
+      body: JSON.stringify({ book_ids: bookIds }),
+    });
+  }
+
   async function purgeExpiredTrash() {
     const session = await requireSession();
     return request("/rest/v1/rpc/purge_deleted_content", {
@@ -337,6 +354,7 @@
     listHistory,
     restoreHistory,
     reorderSlides,
+    reorderBooks,
     purgeExpiredTrash,
     uploadMedia,
     importDefaults,

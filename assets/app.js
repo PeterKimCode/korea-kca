@@ -180,6 +180,8 @@ const DEFAULT_CURRICULUM = ["과정 이해", "핵심 이론", "현장 사례", "
 const CATALOG_TAG_PRIORITY = ["돌봄", "상담", "디지털", "안전", "문화"];
 let courseDetailsMap = {};
 let noticeDetailsMap = {};
+let books = [];
+let bookDetailsMap = {};
 
 function normalizeCourseTags(tags) {
   const seen = new Set();
@@ -234,6 +236,7 @@ function buildDefaultContent() {
       sort_order: index,
       published: true,
     })),
+    books: [],
   };
 }
 
@@ -263,6 +266,10 @@ function applyContentData(content) {
   });
 
   HERO_SLIDES = (content.slides || []).map((slide) => slide.image_url);
+
+  // 교재 테이블이 아직 없는 기존 사이트에서도 다른 콘텐츠는 계속 표시합니다.
+  books = (content.books || []).filter((book) => book && book.slug && book.title);
+  bookDetailsMap = Object.fromEntries(books.map((book) => [book.slug, book]));
 }
 
 function icon(name) {
@@ -565,6 +572,44 @@ function renderHomeNotices() {
   `;
 }
 
+function renderHomeBooks() {
+  const section = document.querySelector("[data-book-section]");
+  const row = document.querySelector("[data-book-row]");
+  if (!section || !row) return;
+
+  if (!books.length) {
+    row.innerHTML = "";
+    section.hidden = true;
+    return;
+  }
+
+  section.hidden = false;
+  row.innerHTML = books.map((book) => {
+    const imageUrl = safeHttpUrl(book.image_url);
+    const description = String(book.description || "").trim();
+    return `
+      <a class="book-card" href="page.html?page=book-${encodeURIComponent(book.slug)}" draggable="false">
+        <div class="book-cover">
+          <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(book.title)} 교재 표지" draggable="false" />
+        </div>
+        <div class="book-card-copy">
+          <span>추천 교재</span>
+          <strong>${escapeHtml(book.title)}</strong>
+          <p>${escapeHtml(description)}</p>
+          <em>교재 보기 ${icon("arrow")}</em>
+        </div>
+      </a>
+    `;
+  }).join("");
+  initializeIcons(row);
+  enableDragScroll(row);
+  row.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    row.scrollBy({ left: event.key === "ArrowRight" ? 320 : -320, behavior: "smooth" });
+  });
+}
+
 function getParams() {
   return new URLSearchParams(window.location.search);
 }
@@ -591,14 +636,14 @@ function pageHero(title, eyebrow, text) {
   return `
     <section class="sub-hero">
       <div>
-        <span class="eyebrow">${eyebrow}</span>
-        <h1>${title}</h1>
-        <p>${text}</p>
+        <span class="eyebrow">${escapeHtml(eyebrow)}</span>
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(text)}</p>
       </div>
       <nav aria-label="현재 위치">
         <a href="index.html">홈</a>
         <span>/</span>
-        <strong>${title}</strong>
+        <strong>${escapeHtml(title)}</strong>
       </nav>
     </section>
   `;
@@ -806,6 +851,32 @@ function renderNoticeArticle(page) {
   `;
 }
 
+function renderBookDetail(slug) {
+  const book = bookDetailsMap[slug];
+  if (!book) {
+    return renderSimplePage("교재를 찾을 수 없습니다", "비공개되었거나 삭제된 교재입니다. 추천 교재 목록에서 다시 확인해 주세요.", "book");
+  }
+
+  const imageUrl = safeHttpUrl(book.image_url);
+  const purchaseUrl = safeHttpUrl(book.purchase_url);
+  return `
+    ${pageHero(book.title, "Recommended Book", "학습 과정과 함께 활용할 수 있는 GTCC 추천 교재입니다.")}
+    <section class="book-detail-shell">
+      <div class="book-detail-cover">
+        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(book.title)} 교재 표지" />
+      </div>
+      <article class="book-detail-copy">
+        <p class="eyebrow">GTCC 추천 교재</p>
+        <h1>${escapeHtml(book.title)}</h1>
+        <div class="book-detail-description">${plainTextMarkup(book.description || "교재의 자세한 내용은 구매 페이지에서 확인해 주세요.")}</div>
+        ${purchaseUrl
+          ? `<a class="primary-btn" href="${escapeHtml(purchaseUrl)}" target="_blank" rel="noopener noreferrer">${icon("book")} 교재 구매하기</a>`
+          : `<p class="book-purchase-unavailable">현재 구매 링크를 확인 중입니다.</p>`}
+      </article>
+    </section>
+  `;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -854,7 +925,12 @@ function renderPage() {
 
   let title = "GTCC대학교 평생교육원";
   let html = "";
-  if (page.startsWith("course-")) {
+  if (page.startsWith("book-")) {
+    const slug = decodeURIComponent(page.slice("book-".length));
+    const book = bookDetailsMap[slug];
+    title = `${book ? book.title : "추천 교재"} | GTCC대학교 평생교육원`;
+    html = renderBookDetail(slug);
+  } else if (page.startsWith("course-")) {
     const courseTitle = courseTitleFromPage(page);
     title = `${courseTitle} | GTCC대학교 평생교육원`;
     html = renderCourseDetail(courseTitle);
@@ -909,6 +985,7 @@ async function bootPublicSite() {
   applyContentData(content);
   initHeroSlider();
   initHomeCourseRows();
+  renderHomeBooks();
   renderHomeNotices();
   renderPage();
 }

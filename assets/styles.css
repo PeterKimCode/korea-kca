@@ -76,13 +76,14 @@ img {
 .hero-section,
 .course-section,
 .faculty-section,
-.review-section,
+.book-section,
 .news-section,
 .notice-section,
 .sub-hero,
 .content-shell,
 .catalog-shell,
 .course-detail-shell,
+.book-detail-shell,
 .support-shell,
 .article-shell,
 .site-footer > * {
@@ -657,7 +658,7 @@ body {
 }
 
 .course-section.light,
-.review-section,
+.book-section,
 .notice-section {
   width: 100%;
   max-width: none;
@@ -916,45 +917,155 @@ body {
   font-weight: 800;
 }
 
-.review-section {
+.book-section {
   padding-top: 64px;
   padding-bottom: 72px;
 }
 
-.review-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.book-section[hidden] {
+  display: none;
+}
+
+.book-row {
+  display: flex;
   gap: 22px;
   width: min(1120px, 100%);
+  padding: 2px 0 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  cursor: grab;
+  scrollbar-color: #b8c5d8 transparent;
+  scrollbar-width: thin;
 }
 
-.review-card {
-  min-height: 210px;
-  padding: 24px;
+.book-row.is-grabbing {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.book-row:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 6px;
+}
+
+.book-card {
+  flex: 0 0 calc((100% - 66px) / 4);
+  min-width: 220px;
+  overflow: hidden;
   border: 1px solid #e0e7f1;
-  border-radius: 16px;
+  border-radius: 8px;
   background: #fff;
+  scroll-snap-align: start;
+  box-shadow: 0 12px 28px rgba(12, 35, 68, 0.07);
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.review-card img {
-  width: 68px;
-  height: 68px;
-  margin-bottom: 18px;
-  border-radius: 18px;
-  object-fit: cover;
+.book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(12, 35, 68, 0.12);
 }
 
-.review-card strong {
+.book-cover {
+  aspect-ratio: 4 / 3;
+  padding: 18px;
+  background: #edf2f8;
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.book-card-copy {
+  padding: 20px;
+}
+
+.book-card-copy > span {
+  color: var(--wine);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.book-card strong {
   display: block;
-  margin-bottom: 10px;
+  margin: 8px 0 10px;
   color: var(--navy);
+  font-size: 18px;
 }
 
-.review-card p {
+.book-card p {
+  display: -webkit-box;
+  min-height: 44px;
   margin: 0;
+  overflow: hidden;
   color: var(--muted);
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.book-card em {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  color: var(--wine);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.book-card em .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.book-detail-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: 64px;
+  align-items: center;
+  padding: 72px 0 90px;
+}
+
+.book-detail-cover {
+  min-height: 480px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.book-detail-cover img {
+  width: 100%;
+  height: 100%;
+  max-height: 560px;
+  object-fit: contain;
+}
+
+.book-detail-copy h1 {
+  margin: 10px 0 22px;
+  color: var(--navy);
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.18;
+}
+
+.book-detail-description {
+  margin-bottom: 30px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.book-detail-description p {
+  margin: 0 0 14px;
+}
+
+.book-purchase-unavailable {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .news-section {
@@ -2105,6 +2216,7 @@ body {
   .support-shell,
   .notice-board-shell,
   .course-intro-grid,
+  .book-detail-shell,
   .course-learning-grid {
     grid-template-columns: 1fr;
   }
@@ -2125,7 +2237,6 @@ body {
 
   .catalog-grid,
   .benefit-list,
-  .review-row,
   .news-grid,
   .course-info-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2158,13 +2269,14 @@ body {
   .hero-section,
   .course-section,
   .faculty-section,
-  .review-section,
+  .book-section,
   .news-section,
   .notice-section,
   .sub-hero,
   .content-shell,
   .catalog-shell,
   .course-detail-shell,
+  .book-detail-shell,
   .support-shell,
   .article-shell,
   .site-footer > * {
@@ -2188,11 +2300,23 @@ body {
   .teacher-list,
   .catalog-grid,
   .benefit-list,
-  .review-row,
   .news-grid,
   .support-grid,
   .course-info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .book-card {
+    flex-basis: min(78vw, 300px);
+  }
+
+  .book-detail-shell {
+    gap: 28px;
+    padding-top: 40px;
+  }
+
+  .book-detail-cover {
+    min-height: 360px;
   }
 
   .hero-copy {

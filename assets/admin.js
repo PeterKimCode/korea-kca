@@ -6,6 +6,7 @@
     courses: { title: "강좌 관리", description: "홈페이지에 표시할 강좌를 추가하거나 수정합니다.", add: "새 강좌 추가", singular: "강좌" },
     notices: { title: "공지 관리", description: "새 소식과 과정 안내를 등록합니다.", add: "새 공지 추가", singular: "공지" },
     slides: { title: "슬라이드 관리", description: "메인 화면의 사진과 표시 순서를 관리합니다.", add: "새 슬라이드 추가", singular: "슬라이드" },
+    books: { title: "교재 관리", description: "추천 교재와 구매 링크를 추가하거나 수정합니다.", add: "새 교재 추가", singular: "교재" },
   };
   const state = {
     entity: "courses",
@@ -95,6 +96,9 @@
 
   function friendlySaveError(error) {
     const message = String(error?.message || "저장하지 못했습니다.");
+    if (/books|reorder_books/i.test(message)) {
+      return "교재 관리 사용 준비가 필요합니다. Supabase SQL Editor에서 book-catalog-migration.sql을 한 번 실행해 주세요.";
+    }
     if (/notices\.(image_url|link_url|link_label)|schema cache|column .*(image_url|link_url|link_label)/i.test(message)) {
       return "공지 이미지·링크 사용 준비가 필요합니다. Supabase SQL Editor에서 notice-media-migration.sql을 한 번 실행해 주세요.";
     }
@@ -123,7 +127,7 @@
         }
       }
     } catch (error) {
-      elements.contentList.innerHTML = `<div class="empty-state">내용을 불러오지 못했습니다.<br />${escapeHtml(error.message)}</div>`;
+      elements.contentList.innerHTML = `<div class="empty-state">내용을 불러오지 못했습니다.<br />${escapeHtml(friendlySaveError(error))}</div>`;
       elements.dataStatus.textContent = "";
     }
   }
@@ -131,7 +135,7 @@
   function renderList() {
     const query = elements.listSearch.value.trim().toLowerCase();
     const items = state.items.filter((item) => {
-      const text = `${item.title || ""} ${item.alt_text || ""} ${item.category || ""}`.toLowerCase();
+      const text = `${item.title || ""} ${item.alt_text || ""} ${item.category || ""} ${item.description || ""}`.toLowerCase();
       return !query || text.includes(query);
     });
     if (!items.length) {
@@ -153,10 +157,13 @@
     } else if (state.entity === "notices") {
       description = `${item.author} · ${formatDate(item.published_at)}`;
       meta = `<span>공지번호 ${item.number || "자동"}</span>${item.link_url ? "<span>링크 있음</span>" : ""}${hasImage ? "<span>사진 있음</span>" : ""}`;
+    } else if (state.entity === "books") {
+      description = item.description;
+      meta = `<span>교재 구매 링크</span>`;
     } else {
       description = `표시 순서 ${Number(item.sort_order || 0) + 1}`;
     }
-    const reorder = state.entity === "slides" && !state.deleted
+    const reorder = ["slides", "books"].includes(state.entity) && !state.deleted
       ? `<button class="admin-secondary" type="button" data-move="-1" data-id="${item.id}">위로</button><button class="admin-secondary" type="button" data-move="1" data-id="${item.id}">아래로</button>`
       : "";
     const actions = state.deleted
@@ -252,6 +259,16 @@
           ${field("링크 버튼 문구", "link_label", item?.link_label || "자세히 보기", { full: true, help: "링크 주소를 입력한 경우에만 홈페이지에 버튼이 표시됩니다." })}
           ${field("작성자", "author", item?.author || "GTCC대학교평생교육원", { required: true })}
           ${field("게시일", "published_at", item?.published_at || today, { type: "date", required: true })}
+          <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
+        </div>
+      `;
+    } else if (state.entity === "books") {
+      elements.editorFields.innerHTML = `
+        <div class="admin-form-grid">
+          ${field("교재명", "title", item?.title, { full: true, required: true })}
+          ${field("교재 설명", "description", item?.description, { type: "textarea", full: true, required: true, help: "홈 카드에는 짧게 표시되고 교재 소개 페이지에는 전체 내용이 표시됩니다." })}
+          ${field("교재 구매 링크", "purchase_url", item?.purchase_url, { type: "url", full: true, required: true, help: "http:// 또는 https://로 시작하는 구매 페이지 주소를 입력합니다." })}
+          ${imageField(item, { label: "교재 표지", required: !item, removable: false })}
           <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
         </div>
       `;
@@ -358,6 +375,19 @@
         published: data.get("published") === "on",
       };
     }
+    if (state.entity === "books") {
+      const purchaseUrl = String(data.get("purchase_url") || "").trim();
+      if (!/^https?:\/\/\S+$/i.test(purchaseUrl)) {
+        throw new Error("교재 구매 링크는 http:// 또는 https://로 시작해야 합니다.");
+      }
+      return {
+        slug: slugify(data.get("title")),
+        title: String(data.get("title")).trim(),
+        description: String(data.get("description")).trim(),
+        purchase_url: purchaseUrl,
+        published: data.get("published") === "on",
+      };
+    }
     return {
       alt_text: String(data.get("alt_text")).trim(),
       published: data.get("published") === "on",
@@ -379,6 +409,8 @@
     } else if (state.entity === "notices") {
       const previewImage = values.image_url === null && !state.optimizedImage ? "" : image;
       elements.previewContent.innerHTML = `<article class="preview-card">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="" />` : ""}<div><span class="admin-kicker">${escapeHtml(values.published_at)}</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.body).replaceAll("\n", "<br />")}</p>${values.link_url ? `<a class="admin-primary preview-link" href="${escapeHtml(values.link_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(values.link_label)}</a>` : ""}<p>${escapeHtml(values.author)}</p></div></article>`;
+    } else if (state.entity === "books") {
+      elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.title)}" />` : ""}<div><span class="admin-kicker">추천 교재</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.description).replaceAll("\n", "<br />")}</p><span class="admin-primary preview-link">교재 구매하기</span></div></article>`;
     } else {
       elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.alt_text)}" />` : ""}<div><h3>${escapeHtml(values.alt_text)}</h3></div></article>`;
     }
@@ -405,13 +437,13 @@
         return;
       }
       if (state.optimizedImage) {
-        const folder = state.entity === "slides" ? "slides" : state.entity === "notices" ? "notices" : "courses";
+        const folder = state.entity === "slides" ? "slides" : state.entity === "notices" ? "notices" : state.entity === "books" ? "books" : "courses";
         values.image_url = await store.uploadMedia(state.optimizedImage, folder, state.optimizedImage.name);
       } else if (state.editing?.image_url && values.image_url !== null) {
         values.image_url = state.editing.image_url;
       }
       if (!state.editing) {
-        // 공지에는 정렬 번호가 없으므로 강좌와 슬라이드에만 순서를 부여합니다.
+        // 공지에는 정렬 번호가 없으므로 강좌·슬라이드·교재에만 순서를 부여합니다.
         if (state.entity !== "notices") {
           values.sort_order = state.items.length ? Math.max(...state.items.map((item) => Number(item.sort_order || 0))) + 10 : 0;
         }
@@ -437,7 +469,7 @@
       showToast("휴지통으로 옮겼습니다. 30일 안에 복구할 수 있습니다.");
       await loadItems();
     } catch (error) {
-      showToast(error.message, true);
+      showToast(friendlySaveError(error), true);
     }
   }
 
@@ -451,7 +483,7 @@
     }
   }
 
-  async function moveSlide(item, direction) {
+  async function moveItem(item, direction) {
     const index = state.items.findIndex((row) => row.id === item.id);
     const target = index + direction;
     if (target < 0 || target >= state.items.length) return;
@@ -459,9 +491,11 @@
     [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
     try {
       // 서버 함수 한 번으로 전체 순서를 바꿔 중간 저장 실패를 방지합니다.
-      state.items = await store.reorderSlides(reordered.map((row) => row.id));
+      state.items = state.entity === "books"
+        ? await store.reorderBooks(reordered.map((row) => row.id))
+        : await store.reorderSlides(reordered.map((row) => row.id));
       renderList();
-      showToast("슬라이드 순서를 변경했습니다.");
+      showToast(`${entityLabels[state.entity].singular} 순서를 변경했습니다.`);
     } catch (error) {
       showToast(error.message, true);
       await loadItems();
@@ -478,7 +512,7 @@
         return;
       }
       const actionLabels = { insert: "새로 추가", update: "수정", delete: "삭제", restore: "복구" };
-      const entityNames = { courses: "강좌", notices: "공지", slides: "슬라이드" };
+      const entityNames = { courses: "강좌", notices: "공지", slides: "슬라이드", books: "교재" };
       elements.historyList.innerHTML = rows.map((row) => {
         const snapshot = row.after_data || row.before_data || {};
         const name = snapshot.title || snapshot.alt_text || "콘텐츠";
@@ -563,7 +597,7 @@
       if (button.dataset.edit) openEditor(item);
       if (button.dataset.delete) deleteItem(item);
       if (button.dataset.restore) restoreItem(item);
-      if (button.dataset.move) moveSlide(item, Number(button.dataset.move));
+      if (button.dataset.move) moveItem(item, Number(button.dataset.move));
     });
     elements.historyList.addEventListener("click", (event) => {
       const button = event.target.closest("[data-history-restore]");

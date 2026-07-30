@@ -83,6 +83,10 @@
   function displayImageUrl(value) {
     const url = String(value || "");
     if (!url || /^(https?:|blob:|data:|\/)/i.test(url)) return url;
+    // 기본 강좌에 저장된 Unsplash 사진 ID는 관리자 화면에서도 실제 이미지 주소로 변환합니다.
+    if (/^photo-[a-z0-9-]+$/i.test(url)) {
+      return `https://images.unsplash.com/${url}?auto=format&fit=crop&w=320&q=75`;
+    }
     return `../${url.replace(/^\.?\//, "")}`;
   }
 

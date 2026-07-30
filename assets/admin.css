@@ -510,10 +510,17 @@ img {
 }
 
 .item-copy p {
+  display: -webkit-box;
   margin: 7px 0 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--admin-muted);
   font-size: 14px;
   line-height: 1.5;
+  white-space: pre-line;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .item-meta {

@@ -997,14 +997,17 @@ body {
 
 .book-card p {
   display: -webkit-box;
-  min-height: 44px;
+  min-height: 66px;
   margin: 0;
   overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.55;
+  white-space: pre-line;
+  word-break: break-word;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .book-card em {
@@ -1053,10 +1056,16 @@ body {
   line-height: 1.18;
 }
 
+.book-detail-copy {
+  min-width: 0;
+}
+
 .book-detail-description {
   margin-bottom: 30px;
+  overflow-wrap: anywhere;
   color: var(--muted);
   line-height: 1.8;
+  word-break: break-word;
 }
 
 .book-detail-description p {

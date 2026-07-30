@@ -11,6 +11,8 @@
 
 이 SQL은 콘텐츠 표, 변경 기록, 30일 휴지통, 이미지 저장소와 관리자 보안 규칙을 한 번에 만듭니다.
 
+이미 운영 중인 홈페이지에 공지 이미지·링크 기능만 추가할 때는 `supabase/notice-media-migration.sql` 전체를 `SQL Editor`에서 한 번 실행합니다.
+
 ## 2. 관리자 계정 두 개 만들기
 
 1. Supabase 왼쪽 `Authentication` → `Users`로 이동합니다.

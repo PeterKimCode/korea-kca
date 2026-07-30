@@ -787,13 +787,21 @@ function renderNoticeArticle(page) {
   const row = noticeRows.find(([id]) => id === number) || noticeRows[0];
   const details = noticeDetailsMap[number] || {};
   const body = details.body || "해당 과정의 수강 신청, 학습자료, 시험 응시, 자격증 발급 안내가 업데이트되었습니다. 자세한 상담이 필요하신 경우 고객센터 문의 버튼을 이용해 주세요.";
+  // 관리자 입력값은 URL 프로토콜을 다시 검사한 뒤 화면에 사용합니다.
+  const imageUrl = safeHttpUrl(details.image_url);
+  const linkUrl = safeHttpUrl(details.link_url);
+  const linkLabel = details.link_label || "자세히 보기";
   return `
     ${pageHero("공지사항", "Notice", "GTCC대학교 평생교육원의 과정 및 운영 안내입니다.")}
     <section class="article-shell">
       <h2>${escapeHtml(row[1])}</h2>
       <dl><div><dt>작성자</dt><dd>${escapeHtml(row[2])}</dd></div><div><dt>작성일</dt><dd>${escapeHtml(row[3])}</dd></div></dl>
+      ${imageUrl ? `<figure class="notice-article-image"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(row[1])}" /></figure>` : ""}
       <div class="notice-article-body">${plainTextMarkup(body)}</div>
-      <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+      <div class="notice-article-actions">
+        ${linkUrl ? `<a class="primary-btn" href="${escapeHtml(linkUrl)}" target="_blank" rel="noopener noreferrer">${icon("arrow")} ${escapeHtml(linkLabel)}</a>` : ""}
+        <a class="ghost-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 고객센터 문의</a>
+      </div>
     </section>
   `;
 }
@@ -805,6 +813,17 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function safeHttpUrl(value) {
+  const url = String(value || "").trim();
+  if (!url) return "";
+  try {
+    const parsed = new URL(url, window.location.href);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+  } catch {
+    return "";
+  }
 }
 
 function plainTextMarkup(value) {

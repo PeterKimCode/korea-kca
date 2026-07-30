@@ -93,6 +93,14 @@
     showToast.timer = window.setTimeout(() => elements.toast.classList.remove("is-visible"), 3200);
   }
 
+  function friendlySaveError(error) {
+    const message = String(error?.message || "저장하지 못했습니다.");
+    if (/notices\.(image_url|link_url|link_label)|schema cache|column .*(image_url|link_url|link_label)/i.test(message)) {
+      return "공지 이미지·링크 사용 준비가 필요합니다. Supabase SQL Editor에서 notice-media-migration.sql을 한 번 실행해 주세요.";
+    }
+    return message;
+  }
+
   function setScreen(name) {
     elements.setupScreen.hidden = name !== "setup";
     elements.loginScreen.hidden = name !== "login";
@@ -135,7 +143,8 @@
 
   function listItemMarkup(item) {
     const title = item.title || item.alt_text;
-    const image = state.entity === "notices" ? "" : `<img src="${escapeHtml(displayImageUrl(item.image_url))}" alt="" />`;
+    const hasImage = Boolean(item.image_url);
+    const image = hasImage ? `<img src="${escapeHtml(displayImageUrl(item.image_url))}" alt="" />` : "";
     let description = "";
     let meta = "";
     if (state.entity === "courses") {
@@ -143,7 +152,7 @@
       meta = [item.category, ...(item.tags || [])].map((value) => `<span>${escapeHtml(value)}</span>`).join("");
     } else if (state.entity === "notices") {
       description = `${item.author} · ${formatDate(item.published_at)}`;
-      meta = `<span>공지번호 ${item.number || "자동"}</span>`;
+      meta = `<span>공지번호 ${item.number || "자동"}</span>${item.link_url ? "<span>링크 있음</span>" : ""}${hasImage ? "<span>사진 있음</span>" : ""}`;
     } else {
       description = `표시 순서 ${Number(item.sort_order || 0) + 1}`;
     }
@@ -154,7 +163,7 @@
       ? `<button class="admin-primary" type="button" data-restore="${item.id}">복구하기</button>`
       : `${reorder}<button class="admin-secondary" type="button" data-edit="${item.id}">수정</button><button class="admin-danger" type="button" data-delete="${item.id}">삭제</button>`;
     return `
-      <article class="admin-list-item ${state.entity === "notices" ? "no-image" : ""}">
+      <article class="admin-list-item ${hasImage ? "" : "no-image"}">
         ${image}
         <div class="item-copy">
           <h2>${escapeHtml(title)}</h2>
@@ -188,18 +197,25 @@
     return `<label class="${classes}">${label}<input type="${options.type || "text"}" name="${name}" value="${escapeHtml(value)}" ${required} ${options.accept ? `accept="${options.accept}"` : ""} />${help}</label>`;
   }
 
-  function imageField(item) {
+  function imageField(item, options = {}) {
     const current = displayImageUrl(item?.image_url);
+    const required = options.required ?? !item;
+    const label = options.label || "사진";
     return `
-      <label class="admin-field full">사진
+      <div class="admin-field full">
+        <span>${escapeHtml(label)}</span>
         <div class="image-picker">
-          <img id="editorImagePreview" src="${escapeHtml(current)}" alt="선택한 사진 미리보기" />
+          <div class="image-preview-frame ${current ? "has-image" : ""}" id="editorImageFrame">
+            <img id="editorImagePreview" src="${escapeHtml(current)}" alt="선택한 사진 미리보기" />
+            <span>선택한 사진 없음</span>
+          </div>
           <div>
-            <input id="imageInput" type="file" name="image_file" accept="image/jpeg,image/png,image/webp" ${item ? "" : "required"} />
+            <input id="imageInput" type="file" name="image_file" aria-label="${escapeHtml(label)}" accept="image/jpeg,image/png,image/webp" ${required ? "required" : ""} />
             <small>JPG, PNG, WebP · 최대 5MB<br />선택하면 자동으로 WebP와 적절한 크기로 바뀝니다.</small>
+            ${options.removable && current ? '<label class="remove-image-check"><input type="checkbox" name="remove_image" /> 기존 사진 삭제</label>' : ""}
           </div>
         </div>
-      </label>
+      </div>
     `;
   }
 
@@ -231,6 +247,9 @@
         <div class="admin-form-grid">
           ${field("공지 제목", "title", item?.title, { full: true, required: true })}
           ${field("공지 내용", "body", item?.body, { type: "textarea", full: true, required: true, help: "줄바꿈은 홈페이지에도 그대로 표시됩니다." })}
+          ${imageField(item, { label: "공지 이미지 (선택)", required: false, removable: true })}
+          ${field("연결할 링크 주소 (선택)", "link_url", item?.link_url, { type: "url", full: true, help: "예: https://www.example.com 자세히 안내할 외부 페이지 주소를 입력합니다." })}
+          ${field("링크 버튼 문구", "link_label", item?.link_label || "자세히 보기", { full: true, help: "링크 주소를 입력한 경우에만 홈페이지에 버튼이 표시됩니다." })}
           ${field("작성자", "author", item?.author || "GTCC대학교평생교육원", { required: true })}
           ${field("게시일", "published_at", item?.published_at || today, { type: "date", required: true })}
           <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
@@ -260,6 +279,9 @@
         if (state.imagePreviewUrl.startsWith("blob:")) URL.revokeObjectURL(state.imagePreviewUrl);
         state.imagePreviewUrl = URL.createObjectURL(state.optimizedImage);
         document.getElementById("editorImagePreview").src = state.imagePreviewUrl;
+        document.getElementById("editorImageFrame")?.classList.add("has-image");
+        const removeImage = elements.editorForm.elements.remove_image;
+        if (removeImage) removeImage.checked = false;
         showToast(`사진을 최적화했습니다. ${Math.round(state.optimizedImage.size / 1024)}KB`);
       } catch (error) {
         input.value = "";
@@ -321,9 +343,16 @@
       };
     }
     if (state.entity === "notices") {
+      const linkUrl = String(data.get("link_url") || "").trim();
+      if (linkUrl && !/^https?:\/\/\S+$/i.test(linkUrl)) {
+        throw new Error("링크 주소는 http:// 또는 https://로 시작해야 합니다.");
+      }
       return {
         title: String(data.get("title")).trim(),
         body: String(data.get("body")).trim(),
+        image_url: data.get("remove_image") === "on" ? null : (state.editing?.image_url || null),
+        link_url: linkUrl || null,
+        link_label: linkUrl ? (String(data.get("link_label") || "").trim() || "자세히 보기") : null,
         author: String(data.get("author")).trim(),
         published_at: data.get("published_at"),
         published: data.get("published") === "on",
@@ -337,12 +366,19 @@
 
   function showPreview() {
     if (!elements.editorForm.reportValidity()) return;
-    const values = valuesFromForm();
+    let values;
+    try {
+      values = valuesFromForm();
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
     const image = state.imagePreviewUrl;
     if (state.entity === "courses") {
       elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="" />` : ""}<div><span class="admin-kicker">${escapeHtml(values.category)}</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.summary)}</p><p>${values.tags.map((tag) => `#${escapeHtml(tag)}`).join(" ")}</p></div></article>`;
     } else if (state.entity === "notices") {
-      elements.previewContent.innerHTML = `<article class="preview-card"><div><span class="admin-kicker">${escapeHtml(values.published_at)}</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.body).replaceAll("\n", "<br />")}</p><p>${escapeHtml(values.author)}</p></div></article>`;
+      const previewImage = values.image_url === null && !state.optimizedImage ? "" : image;
+      elements.previewContent.innerHTML = `<article class="preview-card">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="" />` : ""}<div><span class="admin-kicker">${escapeHtml(values.published_at)}</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.body).replaceAll("\n", "<br />")}</p>${values.link_url ? `<a class="admin-primary preview-link" href="${escapeHtml(values.link_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(values.link_label)}</a>` : ""}<p>${escapeHtml(values.author)}</p></div></article>`;
     } else {
       elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.alt_text)}" />` : ""}<div><h3>${escapeHtml(values.alt_text)}</h3></div></article>`;
     }
@@ -361,11 +397,17 @@
     submitButton.disabled = true;
     submitButton.textContent = "저장 중...";
     try {
-      const values = valuesFromForm();
+      let values;
+      try {
+        values = valuesFromForm();
+      } catch (error) {
+        showToast(error.message, true);
+        return;
+      }
       if (state.optimizedImage) {
-        const folder = state.entity === "slides" ? "slides" : "courses";
+        const folder = state.entity === "slides" ? "slides" : state.entity === "notices" ? "notices" : "courses";
         values.image_url = await store.uploadMedia(state.optimizedImage, folder, state.optimizedImage.name);
-      } else if (state.editing?.image_url) {
+      } else if (state.editing?.image_url && values.image_url !== null) {
         values.image_url = state.editing.image_url;
       }
       if (!state.editing) {
@@ -381,7 +423,7 @@
       showToast("저장했습니다. 홈페이지에 바로 반영됩니다.");
       await loadItems();
     } catch (error) {
-      showToast(error.message, true);
+      showToast(friendlySaveError(error), true);
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = "저장하고 바로 공개";

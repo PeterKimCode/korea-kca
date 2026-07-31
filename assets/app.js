@@ -355,6 +355,30 @@ function initHeroSlider() {
   startAuto();
 }
 
+// 메인 미리보기의 재생 버튼을 누르면 새 창 없이 현재 카드 안에서 YouTube 영상을 재생합니다.
+function initLecturePreview() {
+  const preview = document.querySelector("[data-youtube-preview]");
+  const playButton = preview?.querySelector(".lecture-play");
+  if (!preview || !playButton || preview.dataset.ready === "true") return;
+  preview.dataset.ready = "true";
+
+  playButton.addEventListener("click", () => {
+    const videoId = String(preview.dataset.videoId || "").trim();
+    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return;
+
+    preview.classList.add("is-playing");
+    preview.innerHTML = `
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0"
+        title="온라인 강의 미리보기"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    `;
+  }, { once: true });
+}
+
 function slugify(value) {
   return value
     .toLowerCase()
@@ -984,6 +1008,7 @@ async function bootPublicSite() {
     : window.GTCC_DEFAULT_CONTENT;
   applyContentData(content);
   initHeroSlider();
+  initLecturePreview();
   initHomeCourseRows();
   renderHomeBooks();
   renderHomeNotices();

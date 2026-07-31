@@ -177,11 +177,11 @@ img {
   border: 1px solid var(--admin-wine);
   background: var(--admin-wine);
   background-image: linear-gradient(
-    110deg,
+    120deg,
     var(--admin-navy) 0%,
-    var(--admin-navy) 42%,
-    var(--admin-wine-dark) 72%,
-    #805b2c 100%
+    var(--admin-navy) 38%,
+    #263b59 62%,
+    var(--admin-wine) 100%
   );
   background-position: 0% 50%;
   background-size: 240% 100%;
@@ -847,7 +847,7 @@ img {
    저장 버튼은 브랜드 그라디언트, 삭제 버튼은 명확한 위험 색상을 유지합니다. */
 @media (hover: hover) and (pointer: fine) {
   .admin-primary:hover {
-    border-color: #805b2c;
+    border-color: var(--admin-wine);
     background-position: 100% 50%;
     box-shadow: 0 10px 22px rgba(19, 32, 51, 0.2);
     color: #fff;

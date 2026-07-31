@@ -18,7 +18,7 @@
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --focus-ring: 0 0 0 4px rgba(143, 23, 52, 0.16);
   --card-hover-shadow: 0 20px 42px rgba(19, 32, 51, 0.14);
-  --button-gold-dark: #805b2c;
+  --button-wine-highlight: #ad2852;
 }
 
 * {
@@ -174,11 +174,11 @@ img {
   border: 0;
   background: var(--wine);
   background-image: linear-gradient(
-    110deg,
+    120deg,
     var(--wine) 0%,
-    var(--wine) 42%,
-    var(--wine-dark) 70%,
-    var(--button-gold-dark) 100%
+    var(--wine) 38%,
+    var(--button-wine-highlight) 66%,
+    var(--wine-dark) 100%
   );
   background-position: 0% 50%;
   background-size: 240% 100%;
@@ -316,11 +316,11 @@ body {
   border: 1px solid var(--wine);
   background: var(--wine);
   background-image: linear-gradient(
-    110deg,
+    120deg,
     var(--wine) 0%,
-    var(--wine) 42%,
-    var(--wine-dark) 70%,
-    var(--button-gold-dark) 100%
+    var(--wine) 38%,
+    var(--button-wine-highlight) 66%,
+    var(--wine-dark) 100%
   );
   background-position: 0% 50%;
   background-size: 240% 100%;
@@ -975,20 +975,34 @@ body {
     transform var(--motion-base) var(--ease-premium);
 }
 
-.lecture-preview > .icon {
+.lecture-play {
   position: absolute;
   top: 50%;
   left: 50%;
+  display: grid;
   width: 64px;
   height: 64px;
+  place-items: center;
   padding: 16px;
+  border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
   color: var(--wine);
+  cursor: pointer;
   transform: translate(-50%, -50%);
+  transition:
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-base) var(--ease-premium),
+    color var(--motion-fast) ease,
+    transform var(--motion-fast) var(--ease-premium);
 }
 
-.lecture-preview > div {
+.lecture-play .icon {
+  width: 32px;
+  height: 32px;
+}
+
+.lecture-caption {
   position: absolute;
   right: 30px;
   bottom: 28px;
@@ -1003,6 +1017,17 @@ body {
 .lecture-preview small {
   color: #e5edf7;
   font-weight: 800;
+}
+
+.lecture-preview iframe {
+  display: block;
+  width: 100%;
+  height: 320px;
+  border: 0;
+}
+
+.lecture-preview.is-playing {
+  transform: none;
 }
 
 .book-section {
@@ -1233,8 +1258,8 @@ body {
 
 .notice-section {
   display: grid;
-  grid-template-columns: 1.2fr 0.65fr 0.7fr;
-  gap: 36px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 56px;
   padding-top: 56px;
   padding-bottom: 60px;
 }
@@ -1564,7 +1589,7 @@ body {
   .primary-btn:hover,
   .search button:hover {
     background-position: 100% 50%;
-    border-color: var(--button-gold-dark);
+    border-color: var(--button-wine-highlight);
     box-shadow: 0 10px 24px rgba(95, 16, 35, 0.24);
     color: #fff;
     transform: translateY(-2px);
@@ -1623,6 +1648,18 @@ body {
     transform: scale(1.025);
   }
 
+  .lecture-play:hover {
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(19, 32, 51, 0.24);
+    color: var(--button-wine-highlight);
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  .lecture-preview.is-playing:hover {
+    box-shadow: var(--shadow);
+    transform: none;
+  }
+
   .benefit-card:hover .icon {
     transform: translateY(-1px) scale(1.035);
   }
@@ -1661,6 +1698,12 @@ body {
   outline: 2px solid var(--wine);
   outline-offset: 3px;
   box-shadow: var(--focus-ring);
+}
+
+.lecture-play:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px rgba(143, 23, 52, 0.42);
 }
 
 .contact-panel h2 {

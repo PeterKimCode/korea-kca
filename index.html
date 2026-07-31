@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon-192.png" />
     <link rel="preconnect" href="https://images.unsplash.com" />
-    <link rel="stylesheet" href="assets/styles.css?v=20260730-5" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260731-1" />
   </head>
   <body>
     <!-- 공통 헤더: page.html과 구조를 맞춰야 하며, 현황 문구 변경 시 반복된 3세트를 모두 수정합니다. -->
@@ -208,15 +208,17 @@
           </div>
         </div>
 
-        <!-- 온라인 강의 미리보기: 영상 변경 시 YouTube 주소와 영상 ID가 들어간 썸네일 주소를 함께 수정합니다. -->
-        <a class="lecture-preview" href="https://youtu.be/i3-VLUA2u08?si=OKi-mNrpPeRW6OF2" target="_blank" rel="noopener noreferrer">
+        <!-- 온라인 강의 미리보기: 영상 변경 시 data-video-id와 썸네일 주소의 YouTube 영상 ID를 함께 수정합니다. -->
+        <div class="lecture-preview" data-youtube-preview data-video-id="i3-VLUA2u08">
           <img src="https://i.ytimg.com/vi/i3-VLUA2u08/hqdefault.jpg" alt="온라인 강의 미리보기" />
-          <span data-icon="play"></span>
-          <div>
+          <button class="lecture-play" type="button" aria-label="온라인 강의 바로 재생">
+            <span data-icon="play"></span>
+          </button>
+          <div class="lecture-caption">
             <strong>온라인 강의 미리보기</strong>
             <small>핵심 개념부터 시험 대비까지</small>
           </div>
-        </a>
+        </div>
       </section>
 
       <!-- 공개 중인 교재가 있을 때만 assets/app.js가 이 영역을 표시합니다. -->
@@ -268,10 +270,6 @@
           <a href="page.html?page=certificate-guide">자격증 발급안내</a>
           <a href="page.html?page=faq">자주 묻는 질문</a>
         </div>
-        <a class="award-card" href="page.html?page=scholarship">
-          <span data-icon="award"></span>
-          <strong>장학지원<br />상담 가능</strong>
-        </a>
       </section>
     </main>
 
@@ -303,7 +301,7 @@
 
     <script src="assets/config.js?v=20260727"></script>
     <script src="assets/content-store.js?v=20260730-3"></script>
-    <script src="assets/app.js?v=20260730-4"></script>
+    <script src="assets/app.js?v=20260731-1"></script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   </body>
 </html>

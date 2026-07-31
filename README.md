@@ -209,6 +209,36 @@ const noticeRows = [
 
 강좌 카드와 추천 교재 영역은 비어 있는 컨테이너를 `assets/app.js`가 채우므로 HTML에 직접 카드를 추가하지 않습니다. 교재는 관리자 화면의 `교재 관리`에서 등록합니다.
 
+## 온라인 강의 미리보기 영상 변경
+
+메인 교수진 영역 오른쪽의 `온라인 강의 미리보기`는 재생 버튼을 누르면 새 창을 열지 않고 카드 안에서 YouTube 영상을 재생합니다.
+
+현재 영상:
+
+```text
+https://youtu.be/DF1tqWN5_FA?si=z2Z1TcAwXbs0szvy
+```
+
+영상을 바꾸려면 YouTube 주소에서 영상 ID를 확인합니다. `youtu.be/` 바로 뒤 또는 일반 YouTube 주소의 `v=` 뒤에 있는 11자리 값입니다.
+
+```text
+https://youtu.be/DF1tqWN5_FA
+                  └ 영상 ID: DF1tqWN5_FA
+```
+
+`index.html`의 `lecture-preview`에서 아래 두 곳에 같은 영상 ID를 입력합니다.
+
+```html
+<div class="lecture-preview" data-youtube-preview data-video-id="DF1tqWN5_FA">
+  <img src="https://i.ytimg.com/vi/DF1tqWN5_FA/hqdefault.jpg" alt="온라인 강의 미리보기" />
+</div>
+```
+
+- `data-video-id`: 재생 버튼을 눌렀을 때 카드 안에서 열리는 영상
+- 썸네일 주소의 `/vi/영상ID/`: 재생 전 카드에 표시되는 대표 이미지
+- 두 값이 다르면 썸네일과 실제 재생 영상이 서로 달라지므로 반드시 함께 수정합니다.
+- 수정 후 메인 페이지에서 썸네일 로딩과 인라인 재생을 모두 확인합니다.
+
 ## 하위 페이지 추가 및 수정
 
 하위 페이지는 모두 `page.html?page=페이지이름` 형식입니다. 실제 분기는 `assets/app.js`의 `renderPage()`에서 처리합니다.

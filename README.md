@@ -216,21 +216,21 @@ const noticeRows = [
 현재 영상:
 
 ```text
-https://youtu.be/DF1tqWN5_FA?si=z2Z1TcAwXbs0szvy
+https://youtu.be/Oo6xlkKzxZs?si=qvtTxjG4yzF0VmPB
 ```
 
 영상을 바꾸려면 YouTube 주소에서 영상 ID를 확인합니다. `youtu.be/` 바로 뒤 또는 일반 YouTube 주소의 `v=` 뒤에 있는 11자리 값입니다.
 
 ```text
-https://youtu.be/DF1tqWN5_FA
-                  └ 영상 ID: DF1tqWN5_FA
+https://youtu.be/Oo6xlkKzxZs
+                  └ 영상 ID: Oo6xlkKzxZs
 ```
 
 `index.html`의 `lecture-preview`에서 아래 두 곳에 같은 영상 ID를 입력합니다.
 
 ```html
-<div class="lecture-preview" data-youtube-preview data-video-id="DF1tqWN5_FA">
-  <img src="https://i.ytimg.com/vi/DF1tqWN5_FA/hqdefault.jpg" alt="온라인 강의 미리보기" />
+<div class="lecture-preview" data-youtube-preview data-video-id="Oo6xlkKzxZs">
+  <img src="https://i.ytimg.com/vi/Oo6xlkKzxZs/hqdefault.jpg" alt="온라인 강의 미리보기" />
 </div>
 ```
 

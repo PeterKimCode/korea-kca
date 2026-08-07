@@ -369,7 +369,7 @@ function initLecturePreview() {
     preview.classList.add("is-playing");
     preview.innerHTML = `
       <iframe
-        src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0"
+        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0"
         title="온라인 강의 미리보기"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerpolicy="strict-origin-when-cross-origin"

@@ -6,7 +6,7 @@
     <title>GTCC 콘텐츠 관리자</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="../assets/favicon.ico" sizes="any" />
-    <link rel="stylesheet" href="../assets/admin.css?v=20260731-1" />
+    <link rel="stylesheet" href="../assets/admin.css?v=20260811-1" />
   </head>
   <body class="admin-body">
     <main class="admin-auth" id="setupScreen" hidden>
@@ -14,7 +14,7 @@
         <img src="../assets/gtcc-logo.png" alt="GTCC대학교평생교육원" />
         <span class="admin-kicker">최초 1회 설정</span>
         <h1>관리자 연결이 필요합니다</h1>
-        <p>아래 세 단계가 끝나면 이 화면에서 강좌, 공지, 슬라이드, 교재를 바로 수정할 수 있습니다.</p>
+        <p>아래 세 단계가 끝나면 이 화면에서 강좌, 공지, 슬라이드, 교재, 교수진과 영상을 바로 수정할 수 있습니다.</p>
         <ol class="setup-steps">
           <li><strong>1</strong><span>Supabase 프로젝트를 만들고 <code>supabase/schema.sql</code>을 실행합니다.</span></li>
           <li><strong>2</strong><span>관리자 계정 두 개를 만들고 UUID를 <code>admin_users</code>에 등록합니다.</span></li>
@@ -68,6 +68,12 @@
           </button>
           <button class="admin-nav" type="button" data-entity="books">
             <span class="nav-symbol" data-icon="book" aria-hidden="true"></span><span><strong>교재 관리</strong><small>교재와 구매 링크</small></span>
+          </button>
+          <button class="admin-nav" type="button" data-entity="faculty">
+            <span class="nav-symbol" data-icon="layers" aria-hidden="true"></span><span><strong>교수진 관리</strong><small>교수 소개와 사진</small></span>
+          </button>
+          <button class="admin-nav" type="button" data-entity="videos">
+            <span class="nav-symbol" data-icon="play" aria-hidden="true"></span><span><strong>미리보기 영상</strong><small>YouTube 링크 변경</small></span>
           </button>
           <div class="admin-sidebar-help">
             <strong>실수해도 괜찮습니다</strong>
@@ -135,7 +141,7 @@
       <section class="dialog-shell">
         <header><div><span class="admin-kicker">한 장 사용법</span><h2>홈페이지 수정 순서</h2></div><button class="dialog-close" type="button" data-close-help aria-label="닫기">×</button></header>
         <div class="dialog-body help-steps">
-          <article><span>1</span><div><strong>왼쪽에서 종류 선택</strong><p>강좌, 공지, 슬라이드, 교재 중 수정할 메뉴를 누릅니다.</p></div></article>
+          <article><span>1</span><div><strong>왼쪽에서 종류 선택</strong><p>강좌, 공지, 슬라이드, 교재, 교수진, 영상 중 수정할 메뉴를 누릅니다.</p></div></article>
           <article><span>2</span><div><strong>추가 또는 수정</strong><p>새로 추가 버튼을 누르거나 기존 항목의 수정 버튼을 누릅니다.</p></div></article>
           <article><span>3</span><div><strong>사진과 글 입력</strong><p>사진은 자동으로 크기가 줄어듭니다. 공지에는 안내 링크 버튼도 넣을 수 있습니다.</p></div></article>
           <article><span>4</span><div><strong>미리보기 확인</strong><p>미리보기에서 사진과 글이 맞는지 한 번 확인합니다.</p></div></article>
@@ -148,8 +154,8 @@
     <div class="admin-toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="../assets/config.js?v=20260727"></script>
-    <script src="../assets/content-store.js?v=20260730-3"></script>
-    <script src="../assets/app.js?v=20260730-4"></script>
-    <script src="../assets/admin.js?v=20260730-4"></script>
+    <script src="../assets/content-store.js?v=20260811-1"></script>
+    <script src="../assets/app.js?v=20260811-1"></script>
+    <script src="../assets/admin.js?v=20260811-1"></script>
   </body>
 </html>

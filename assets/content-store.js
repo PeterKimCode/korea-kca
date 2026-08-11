@@ -7,7 +7,7 @@
   const configured = /^https:\/\/.+\.supabase\.co$/.test(baseUrl) && anonKey.length > 20;
   const cacheKey = "gtcc-public-content-v1";
   const sessionKey = "gtcc-admin-session-v1";
-  const entityNames = new Set(["courses", "notices", "slides", "books"]);
+  const entityNames = new Set(["courses", "notices", "slides", "books", "faculty", "videos"]);
 
   function headers(token = "", extra = {}) {
     return {
@@ -76,12 +76,25 @@
         // 교재 마이그레이션 전에도 기존 강좌·공지·슬라이드는 정상적으로 표시합니다.
         console.warn("교재 데이터가 아직 준비되지 않았습니다.", error);
       }
+      let faculty = fallback.faculty || [];
+      let videos = fallback.videos || [];
+      try {
+        [faculty, videos] = await Promise.all([
+          request("/rest/v1/faculty?select=*&published=eq.true&deleted_at=is.null&order=sort_order.asc"),
+          request("/rest/v1/videos?select=*&published=eq.true&deleted_at=is.null&order=sort_order.asc"),
+        ]);
+      } catch (error) {
+        // 새 테이블을 설치하기 전에는 저장소에 포함된 기본 교수진과 영상을 표시합니다.
+        console.warn("교수진·영상 데이터가 아직 준비되지 않았습니다.", error);
+      }
       const content = {
         // 비공개 또는 삭제로 빈 목록이 된 경우 기본 콘텐츠를 다시 노출하지 않습니다.
         courses,
         notices,
         slides,
         books,
+        faculty,
+        videos,
         source: "remote",
       };
       writeCache(content);
@@ -269,6 +282,24 @@
     });
   }
 
+  async function reorderFaculty(facultyIds) {
+    const session = await requireSession();
+    return request("/rest/v1/rpc/reorder_faculty", {
+      method: "POST",
+      token: session.access_token,
+      body: JSON.stringify({ faculty_ids: facultyIds }),
+    });
+  }
+
+  async function reorderVideos(videoIds) {
+    const session = await requireSession();
+    return request("/rest/v1/rpc/reorder_videos", {
+      method: "POST",
+      token: session.access_token,
+      body: JSON.stringify({ video_ids: videoIds }),
+    });
+  }
+
   async function purgeExpiredTrash() {
     const session = await requireSession();
     return request("/rest/v1/rpc/purge_deleted_content", {
@@ -301,24 +332,30 @@
 
   async function importDefaults(content) {
     const session = await requireSession();
-    const [existingCourses, existingNotices, existingSlides] = await Promise.all([
+    const [existingCourses, existingNotices, existingSlides, existingFaculty, existingVideos] = await Promise.all([
       request("/rest/v1/courses?select=id,slug", { token: session.access_token }),
       request("/rest/v1/notices?select=id,number", { token: session.access_token }),
       request("/rest/v1/slides?select=id,image_url", { token: session.access_token }),
+      request("/rest/v1/faculty?select=id,slug", { token: session.access_token }).catch(() => []),
+      request("/rest/v1/videos?select=id,youtube_url", { token: session.access_token }).catch(() => []),
     ]);
     const existingKeys = {
       courses: new Set(existingCourses.map((row) => String(row.slug).toLocaleLowerCase("ko-KR"))),
       notices: new Set(existingNotices.map((row) => String(row.number))),
       slides: new Set(existingSlides.map((row) => String(row.image_url))),
+      faculty: new Set(existingFaculty.map((row) => String(row.slug).toLocaleLowerCase("ko-KR"))),
+      videos: new Set(existingVideos.map((row) => String(row.youtube_url))),
     };
     const missingContent = {
       courses: (content.courses || []).filter((row) => !existingKeys.courses.has(String(row.slug).toLocaleLowerCase("ko-KR"))),
       notices: (content.notices || []).filter((row) => !existingKeys.notices.has(String(row.number))),
       slides: (content.slides || []).filter((row) => !existingKeys.slides.has(String(row.image_url))),
+      faculty: (content.faculty || []).filter((row) => !existingKeys.faculty.has(String(row.slug).toLocaleLowerCase("ko-KR"))),
+      videos: (content.videos || []).filter((row) => !existingKeys.videos.has(String(row.youtube_url))),
     };
-    const imported = { courses: [], notices: [], slides: [], total: 0 };
+    const imported = { courses: [], notices: [], slides: [], faculty: [], videos: [], total: 0 };
 
-    for (const entity of ["courses", "notices", "slides"]) {
+    for (const entity of ["courses", "notices", "slides", "faculty", "videos"]) {
       if (!missingContent[entity].length) continue;
       imported[entity] = await request(`/rest/v1/${entity}`, {
         method: "POST",
@@ -355,6 +392,8 @@
     restoreHistory,
     reorderSlides,
     reorderBooks,
+    reorderFaculty,
+    reorderVideos,
     purgeExpiredTrash,
     uploadMedia,
     importDefaults,

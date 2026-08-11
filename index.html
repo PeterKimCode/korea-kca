@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon-192.png" />
     <link rel="preconnect" href="https://images.unsplash.com" />
-    <link rel="stylesheet" href="assets/styles.css?v=20260731-1" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260811-1" />
   </head>
   <body>
     <!-- 공통 헤더: page.html과 구조를 맞춰야 하며, 현황 문구 변경 시 반복된 3세트를 모두 수정합니다. -->
@@ -189,36 +189,12 @@
             <h2>분야별 현장 경험을 갖춘 강사진</h2>
             <a href="page.html?page=instructors">교수진 전체보기</a>
           </div>
-          <div class="teacher-list">
-            <a class="teacher-card" href="page.html?page=instructor-kang">
-              <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=320&q=80" alt="강민지 교수" />
-              <strong>김 혜지 교수</strong>
-              <span>상담·아동교육</span>
-            </a>
-            <a class="teacher-card" href="page.html?page=instructor-kim">
-              <img src="assets/hero-slides/조나.png" />
-              <strong>JONALYN  교수</strong>
-              <span>TESOL,영어실무</span>
-            </a>
-            <a class="teacher-card" href="page.html?page=instructor-park">
-              <img src="assets/hero-slides/@@001.jpg" />
-              <strong>김 낙신 교수</strong>
-              <span>탐정학,경비학실무</span>
-            </a>
-          </div>
+          <!-- 관리자에서 공개한 교수진 카드가 이 영역에 자동으로 표시됩니다. -->
+          <div class="teacher-list" data-faculty-list></div>
         </div>
 
-        <!-- 온라인 강의 미리보기: 영상 변경 시 data-video-id와 썸네일 주소의 YouTube 영상 ID를 함께 수정합니다. -->
-        <div class="lecture-preview" data-youtube-preview data-video-id="Oo6xlkKzxZs">
-          <img src="https://i.ytimg.com/vi/Oo6xlkKzxZs/hqdefault.jpg" alt="온라인 강의 미리보기" />
-          <button class="lecture-play" type="button" aria-label="온라인 강의 바로 재생">
-            <span data-icon="play"></span>
-          </button>
-          <div class="lecture-caption">
-            <strong>온라인 강의 미리보기</strong>
-            <small>핵심 개념부터 시험 대비까지</small>
-          </div>
-        </div>
+        <!-- 관리자에서 설정한 유튜브 주소가 카드 안의 인라인 플레이어로 연결됩니다. -->
+        <div class="lecture-preview" data-youtube-preview></div>
       </section>
 
       <!-- 공개 중인 교재가 있을 때만 assets/app.js가 이 영역을 표시합니다. -->
@@ -300,8 +276,8 @@
     </aside>
 
     <script src="assets/config.js?v=20260727"></script>
-    <script src="assets/content-store.js?v=20260730-3"></script>
-    <script src="assets/app.js?v=20260807-1"></script>
+    <script src="assets/content-store.js?v=20260811-1"></script>
+    <script src="assets/app.js?v=20260811-1"></script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
   </body>
 </html>

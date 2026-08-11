@@ -182,6 +182,47 @@ let courseDetailsMap = {};
 let noticeDetailsMap = {};
 let books = [];
 let bookDetailsMap = {};
+const DEFAULT_FACULTY = [
+  {
+    slug: "kim-hyeji",
+    name: "김 혜지 교수",
+    role: "상담·아동교육",
+    specialties: "상담, 아동교육",
+    bio: "상담과 아동교육 분야의 현장 경험을 바탕으로 학습자의 성장을 돕습니다.",
+    image_url: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=640&q=82",
+    sort_order: 0,
+    published: true,
+  },
+  {
+    slug: "jonalyn",
+    name: "JONALYN 교수",
+    role: "TESOL·영어실무",
+    specialties: "TESOL, 영어실무",
+    bio: "영어교육 이론과 실제 수업 경험을 연결하는 실무 중심 교육을 진행합니다.",
+    image_url: "assets/hero-slides/조나.png",
+    sort_order: 10,
+    published: true,
+  },
+  {
+    slug: "kim-naksin",
+    name: "김 낙신 교수",
+    role: "탐정학·경비학실무",
+    specialties: "탐정학, 경비학실무",
+    bio: "탐정 및 경비 분야의 전문 지식과 현장 사례를 알기 쉽게 전달합니다.",
+    image_url: "assets/hero-slides/@@001.jpg",
+    sort_order: 20,
+    published: true,
+  },
+];
+const DEFAULT_PREVIEW_VIDEOS = [{
+  title: "온라인 강의 미리보기",
+  caption: "핵심 개념부터 시험 대비까지",
+  youtube_url: "https://youtu.be/Oo6xlkKzxZs",
+  sort_order: 0,
+  published: true,
+}];
+let faculty = [...DEFAULT_FACULTY];
+let previewVideos = [...DEFAULT_PREVIEW_VIDEOS];
 
 function normalizeCourseTags(tags) {
   const seen = new Set();
@@ -237,6 +278,8 @@ function buildDefaultContent() {
       published: true,
     })),
     books: [],
+    faculty: DEFAULT_FACULTY,
+    videos: DEFAULT_PREVIEW_VIDEOS,
   };
 }
 
@@ -270,6 +313,10 @@ function applyContentData(content) {
   // 교재 테이블이 아직 없는 기존 사이트에서도 다른 콘텐츠는 계속 표시합니다.
   books = (content.books || []).filter((book) => book && book.slug && book.title);
   bookDetailsMap = Object.fromEntries(books.map((book) => [book.slug, book]));
+  const facultyRows = Array.isArray(content.faculty) ? content.faculty : DEFAULT_FACULTY;
+  const videoRows = Array.isArray(content.videos) ? content.videos : DEFAULT_PREVIEW_VIDEOS;
+  faculty = facultyRows.filter((person) => person && person.slug && person.name);
+  previewVideos = videoRows.filter((video) => video && video.youtube_url);
 }
 
 function icon(name) {
@@ -356,6 +403,60 @@ function initHeroSlider() {
 }
 
 // 메인 미리보기의 재생 버튼을 누르면 새 창 없이 현재 카드 안에서 YouTube 영상을 재생합니다.
+function youtubeVideoId(value) {
+  const input = String(value || "").trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+  try {
+    const url = new URL(input);
+    if (url.hostname === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || "";
+    if (url.hostname.endsWith("youtube.com")) {
+      if (url.pathname === "/watch") return url.searchParams.get("v") || "";
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (["embed", "shorts", "live"].includes(parts[0])) return parts[1] || "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+// 교수진과 미리보기 영상은 관리자에서 저장한 공개 데이터로 매번 다시 그립니다.
+function renderFacultyAndVideo() {
+  const facultyList = document.querySelector("[data-faculty-list]");
+  if (facultyList) {
+    facultyList.innerHTML = faculty.map((person) => `
+      <a class="teacher-card" href="page.html?page=instructor-${encodeURIComponent(person.slug)}">
+        <img src="${escapeHtml(courseImageUrl(person.image_url, 480))}" alt="${escapeHtml(person.name)}" loading="lazy" />
+        <strong>${escapeHtml(person.name)}</strong>
+        <span>${escapeHtml(person.role || person.specialties || "전문 교수진")}</span>
+      </a>
+    `).join("");
+  }
+
+  const preview = document.querySelector("[data-youtube-preview]");
+  if (!preview) return;
+  const video = previewVideos[0];
+  const videoId = youtubeVideoId(video?.youtube_url);
+  if (!video || !videoId) {
+    preview.hidden = true;
+    return;
+  }
+  preview.hidden = false;
+  preview.dataset.videoId = videoId;
+  preview.removeAttribute("data-ready");
+  preview.innerHTML = `
+    <img src="https://i.ytimg.com/vi/${videoId}/hqdefault.jpg" alt="${escapeHtml(video.title || "온라인 강의 미리보기")}" />
+    <button class="lecture-play" type="button" aria-label="온라인 강의 바로 재생">
+      <span data-icon="play"></span>
+    </button>
+    <div class="lecture-caption">
+      <strong>${escapeHtml(video.title || "온라인 강의 미리보기")}</strong>
+      <small>${escapeHtml(video.caption || "핵심 개념부터 시험 대비까지")}</small>
+    </div>
+  `;
+  initializeIcons(preview);
+}
+
 function initLecturePreview() {
   const preview = document.querySelector("[data-youtube-preview]");
   const playButton = preview?.querySelector(".lecture-play");
@@ -937,6 +1038,49 @@ function renderSimplePage(title, text, iconName = "book") {
   `;
 }
 
+function renderFacultyDirectory() {
+  return `
+    ${pageHero("전문 교수진", "Faculty", "분야별 현장 경험을 바탕으로 실무 중심 교육을 진행하는 강사진입니다.")}
+    <section class="content-shell faculty-directory">
+      ${faculty.length ? faculty.map((person) => `
+        <a class="faculty-directory-card" href="page.html?page=instructor-${encodeURIComponent(person.slug)}">
+          <img src="${escapeHtml(courseImageUrl(person.image_url, 720))}" alt="${escapeHtml(person.name)}" />
+          <div>
+            <span>${escapeHtml(person.role || "전문 교수진")}</span>
+            <h2>${escapeHtml(person.name)}</h2>
+            <p>${escapeHtml(person.bio || person.specialties || "")}</p>
+            <strong>교수 소개 보기 ${icon("arrow")}</strong>
+          </div>
+        </a>
+      `).join("") : '<p class="catalog-empty">현재 공개된 교수진 정보가 없습니다.</p>'}
+    </section>
+  `;
+}
+
+function renderFacultyProfile(slug) {
+  const person = faculty.find((row) => row.slug === slug);
+  if (!person) {
+    return renderSimplePage("교수진 정보를 찾을 수 없습니다", "비공개되었거나 삭제된 교수진입니다.", "layers");
+  }
+  const specialties = String(person.specialties || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return `
+    ${pageHero(person.name, "Faculty Profile", person.role || "GTCC 전문 교수진")}
+    <section class="faculty-profile content-shell">
+      <figure><img src="${escapeHtml(courseImageUrl(person.image_url, 960))}" alt="${escapeHtml(person.name)}" /></figure>
+      <article>
+        <span class="eyebrow">${escapeHtml(person.role || "전문 교수진")}</span>
+        <h2>${escapeHtml(person.name)}</h2>
+        ${specialties.length ? `<div class="faculty-specialties">${specialties.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+        <div class="faculty-bio">${plainTextMarkup(person.bio || "현장 경험을 바탕으로 학습자 중심의 교육을 진행합니다.")}</div>
+        <a class="primary-btn" href="${KAKAO_URL}" target="_blank" rel="noopener">${icon("message")} 수강 상담</a>
+      </article>
+    </section>
+  `;
+}
+
 function renderPage() {
   // page.html?page=... 값을 실제 하위 페이지 렌더러에 연결하는 중앙 라우터입니다.
   const mount = document.getElementById("pageMount");
@@ -949,7 +1093,12 @@ function renderPage() {
 
   let title = "GTCC대학교 평생교육원";
   let html = "";
-  if (page.startsWith("book-")) {
+  if (page.startsWith("instructor-")) {
+    const slug = decodeURIComponent(page.slice("instructor-".length));
+    const person = faculty.find((row) => row.slug === slug);
+    title = `${person ? person.name : "전문 교수진"} | GTCC대학교 평생교육원`;
+    html = renderFacultyProfile(slug);
+  } else if (page.startsWith("book-")) {
     const slug = decodeURIComponent(page.slice("book-".length));
     const book = bookDetailsMap[slug];
     title = `${book ? book.title : "추천 교재"} | GTCC대학교 평생교육원`;
@@ -979,12 +1128,14 @@ function renderPage() {
   } else if (page.startsWith("notice-")) {
     title = "공지사항 | GTCC대학교 평생교육원";
     html = renderNoticeArticle(page);
+  } else if (page === "instructors") {
+    title = "전문 교수진 | GTCC대학교 평생교육원";
+    html = renderFacultyDirectory();
   } else {
     const labels = {
       faq: ["자주 묻는 질문", "학습 환경, 시험 응시, 자격증 발급 관련 질문을 정리했습니다.", "headset"],
       "course-guide": ["수강안내", "신청부터 학습, 시험 응시까지의 기본 절차를 안내합니다.", "monitor"],
       "certificate-guide": ["자격증 발급안내", "수료 후 자격증 신청과 배송 절차를 안내합니다.", "certificate"],
-      instructors: ["전문 교수진", "분야별 실무 경험을 바탕으로 구성된 강사진을 소개합니다.", "layers"],
       "sample-lecture": ["샘플 강의", "과정 선택 전 온라인 강의 흐름을 미리 확인할 수 있습니다.", "play"],
       lms: ["LMS", "등록한 과정의 학습 현황, 시험 응시, 수료 정보를 확인하는 학습자 전용 공간입니다.", "monitor"],
     };
@@ -1008,6 +1159,7 @@ async function bootPublicSite() {
     : window.GTCC_DEFAULT_CONTENT;
   applyContentData(content);
   initHeroSlider();
+  renderFacultyAndVideo();
   initLecturePreview();
   initHomeCourseRows();
   renderHomeBooks();

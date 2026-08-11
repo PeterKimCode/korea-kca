@@ -7,6 +7,8 @@
     notices: { title: "공지 관리", description: "새 소식과 과정 안내를 등록합니다.", add: "새 공지 추가", singular: "공지" },
     slides: { title: "슬라이드 관리", description: "메인 화면의 사진과 표시 순서를 관리합니다.", add: "새 슬라이드 추가", singular: "슬라이드" },
     books: { title: "교재 관리", description: "추천 교재와 구매 링크를 추가하거나 수정합니다.", add: "새 교재 추가", singular: "교재" },
+    faculty: { title: "교수진 관리", description: "교수진 소개와 사진, 홈페이지 표시 순서를 관리합니다.", add: "새 교수진 추가", singular: "교수진" },
+    videos: { title: "미리보기 영상", description: "교수진 옆에 표시되는 YouTube 미리보기 영상을 관리합니다.", add: "새 영상 추가", singular: "영상" },
   };
   const state = {
     entity: "courses",
@@ -62,6 +64,23 @@
       .replace(/^-|-$/g, "");
   }
 
+  function youtubeVideoId(value) {
+    const input = String(value || "").trim();
+    if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+    try {
+      const url = new URL(input);
+      if (url.hostname === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || "";
+      if (url.hostname.endsWith("youtube.com")) {
+        if (url.pathname === "/watch") return url.searchParams.get("v") || "";
+        const parts = url.pathname.split("/").filter(Boolean);
+        if (["embed", "shorts", "live"].includes(parts[0])) return parts[1] || "";
+      }
+    } catch {
+      return "";
+    }
+    return "";
+  }
+
   function normalizeTags(value) {
     const seen = new Set();
     return String(value || "")
@@ -106,6 +125,9 @@
     if (/notices\.(image_url|link_url|link_label)|schema cache|column .*(image_url|link_url|link_label)/i.test(message)) {
       return "공지 이미지·링크 사용 준비가 필요합니다. Supabase SQL Editor에서 notice-media-migration.sql을 한 번 실행해 주세요.";
     }
+    if (/faculty|videos|reorder_faculty|reorder_videos/i.test(message)) {
+      return "교수진·영상 관리 사용 준비가 필요합니다. Supabase SQL Editor에서 faculty-video-migration.sql을 한 번 실행해 주세요.";
+    }
     return message;
   }
 
@@ -139,7 +161,7 @@
   function renderList() {
     const query = elements.listSearch.value.trim().toLowerCase();
     const items = state.items.filter((item) => {
-      const text = `${item.title || ""} ${item.alt_text || ""} ${item.category || ""} ${item.description || ""}`.toLowerCase();
+      const text = `${item.title || ""} ${item.name || ""} ${item.alt_text || ""} ${item.category || ""} ${item.description || ""} ${item.role || ""} ${item.specialties || ""}`.toLowerCase();
       return !query || text.includes(query);
     });
     if (!items.length) {
@@ -150,9 +172,11 @@
   }
 
   function listItemMarkup(item) {
-    const title = item.title || item.alt_text;
-    const hasImage = Boolean(item.image_url);
-    const image = hasImage ? `<img src="${escapeHtml(displayImageUrl(item.image_url))}" alt="" />` : "";
+    const title = item.title || item.name || item.alt_text;
+    const videoId = state.entity === "videos" ? youtubeVideoId(item.youtube_url) : "";
+    const imageSource = item.image_url || (videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "");
+    const hasImage = Boolean(imageSource);
+    const image = hasImage ? `<img src="${escapeHtml(displayImageUrl(imageSource))}" alt="" />` : "";
     let description = "";
     let meta = "";
     if (state.entity === "courses") {
@@ -164,10 +188,16 @@
     } else if (state.entity === "books") {
       description = item.description;
       meta = `<span>교재 구매 링크</span>`;
+    } else if (state.entity === "faculty") {
+      description = item.bio || item.role;
+      meta = `<span>${escapeHtml(item.role || "전문 교수진")}</span>${item.specialties ? `<span>${escapeHtml(item.specialties)}</span>` : ""}`;
+    } else if (state.entity === "videos") {
+      description = item.caption || item.youtube_url;
+      meta = `<span>YouTube 영상</span>`;
     } else {
       description = `표시 순서 ${Number(item.sort_order || 0) + 1}`;
     }
-    const reorder = ["slides", "books"].includes(state.entity) && !state.deleted
+    const reorder = ["slides", "books", "faculty", "videos"].includes(state.entity) && !state.deleted
       ? `<button class="admin-secondary" type="button" data-move="-1" data-id="${item.id}">위로</button><button class="admin-secondary" type="button" data-move="1" data-id="${item.id}">아래로</button>`
       : "";
     const actions = state.deleted
@@ -273,6 +303,26 @@
           ${field("교재 설명", "description", item?.description, { type: "textarea", full: true, required: true, help: "홈 카드에는 짧게 표시되고 교재 소개 페이지에는 전체 내용이 표시됩니다." })}
           ${field("교재 구매 링크", "purchase_url", item?.purchase_url, { type: "url", full: true, required: true, help: "http:// 또는 https://로 시작하는 구매 페이지 주소를 입력합니다." })}
           ${imageField(item, { label: "교재 표지", required: !item, removable: false })}
+          <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
+        </div>
+      `;
+    } else if (state.entity === "faculty") {
+      elements.editorFields.innerHTML = `
+        <div class="admin-form-grid">
+          ${field("이름", "name", item?.name, { required: true, help: "예: 김혜지 교수" })}
+          ${field("직함·담당 분야", "role", item?.role, { required: true, help: "예: 상담·아동교육" })}
+          ${field("전문 분야", "specialties", item?.specialties, { full: true, help: "쉼표로 구분합니다. 예: 상담, 아동교육, 가족코칭" })}
+          ${field("교수 소개", "bio", item?.bio, { type: "textarea", full: true, required: true, help: "교수진 상세 페이지에 줄바꿈 그대로 표시됩니다." })}
+          ${imageField(item, { label: "교수진 사진", required: !item })}
+          <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
+        </div>
+      `;
+    } else if (state.entity === "videos") {
+      elements.editorFields.innerHTML = `
+        <div class="admin-form-grid">
+          ${field("영상 제목", "title", item?.title || "온라인 강의 미리보기", { full: true, required: true })}
+          ${field("짧은 설명", "caption", item?.caption || "핵심 개념부터 시험 대비까지", { full: true, required: true })}
+          ${field("YouTube 링크", "youtube_url", item?.youtube_url, { type: "url", full: true, required: true, help: "유튜브 공유에서 복사한 https://youtu.be/... 주소를 그대로 붙여넣으세요." })}
           <label class="admin-field full"><span class="check-field"><input type="checkbox" name="published" ${item?.published !== false ? "checked" : ""} /> 홈페이지에 공개</span></label>
         </div>
       `;
@@ -392,6 +442,29 @@
         published: data.get("published") === "on",
       };
     }
+    if (state.entity === "faculty") {
+      const name = String(data.get("name") || "").trim();
+      return {
+        slug: state.editing?.slug || slugify(name),
+        name,
+        role: String(data.get("role") || "").trim(),
+        specialties: String(data.get("specialties") || "").trim(),
+        bio: String(data.get("bio") || "").trim(),
+        published: data.get("published") === "on",
+      };
+    }
+    if (state.entity === "videos") {
+      const youtubeUrl = String(data.get("youtube_url") || "").trim();
+      if (!youtubeVideoId(youtubeUrl)) {
+        throw new Error("올바른 YouTube 영상 주소를 입력해 주세요.");
+      }
+      return {
+        title: String(data.get("title") || "").trim(),
+        caption: String(data.get("caption") || "").trim(),
+        youtube_url: youtubeUrl,
+        published: data.get("published") === "on",
+      };
+    }
     return {
       alt_text: String(data.get("alt_text")).trim(),
       published: data.get("published") === "on",
@@ -415,6 +488,11 @@
       elements.previewContent.innerHTML = `<article class="preview-card">${previewImage ? `<img src="${escapeHtml(previewImage)}" alt="" />` : ""}<div><span class="admin-kicker">${escapeHtml(values.published_at)}</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.body).replaceAll("\n", "<br />")}</p>${values.link_url ? `<a class="admin-primary preview-link" href="${escapeHtml(values.link_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(values.link_label)}</a>` : ""}<p>${escapeHtml(values.author)}</p></div></article>`;
     } else if (state.entity === "books") {
       elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.title)}" />` : ""}<div><span class="admin-kicker">추천 교재</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.description).replaceAll("\n", "<br />")}</p><span class="admin-primary preview-link">교재 구매하기</span></div></article>`;
+    } else if (state.entity === "faculty") {
+      elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.name)}" />` : ""}<div><span class="admin-kicker">${escapeHtml(values.role)}</span><h3>${escapeHtml(values.name)}</h3><p>${escapeHtml(values.bio).replaceAll("\n", "<br />")}</p><p>${escapeHtml(values.specialties)}</p></div></article>`;
+    } else if (state.entity === "videos") {
+      const videoId = youtubeVideoId(values.youtube_url);
+      elements.previewContent.innerHTML = `<article class="preview-card"><img src="https://i.ytimg.com/vi/${escapeHtml(videoId)}/hqdefault.jpg" alt="" /><div><span class="admin-kicker">YouTube 미리보기</span><h3>${escapeHtml(values.title)}</h3><p>${escapeHtml(values.caption)}</p></div></article>`;
     } else {
       elements.previewContent.innerHTML = `<article class="preview-card">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(values.alt_text)}" />` : ""}<div><h3>${escapeHtml(values.alt_text)}</h3></div></article>`;
     }
@@ -424,7 +502,7 @@
   async function saveEditor(event) {
     event.preventDefault();
     if (!elements.editorForm.reportValidity()) return;
-    if (!state.editing && state.entity !== "notices" && !state.optimizedImage) {
+    if (!state.editing && ["courses", "slides", "books", "faculty"].includes(state.entity) && !state.optimizedImage) {
       showToast("사진을 먼저 선택해 주세요.", true);
       return;
     }
@@ -441,7 +519,7 @@
         return;
       }
       if (state.optimizedImage) {
-        const folder = state.entity === "slides" ? "slides" : state.entity === "notices" ? "notices" : state.entity === "books" ? "books" : "courses";
+        const folder = state.entity === "slides" ? "slides" : state.entity === "notices" ? "notices" : state.entity === "books" ? "books" : state.entity === "faculty" ? "faculty" : "courses";
         values.image_url = await store.uploadMedia(state.optimizedImage, folder, state.optimizedImage.name);
       } else if (state.editing?.image_url && values.image_url !== null) {
         values.image_url = state.editing.image_url;
@@ -467,7 +545,7 @@
   }
 
   async function deleteItem(item) {
-    if (!window.confirm(`"${item.title || item.alt_text}"을(를) 휴지통으로 옮길까요?`)) return;
+    if (!window.confirm(`"${item.title || item.name || item.alt_text}"을(를) 휴지통으로 옮길까요?`)) return;
     try {
       await store.softDelete(state.entity, item);
       showToast("휴지통으로 옮겼습니다. 30일 안에 복구할 수 있습니다.");
@@ -495,9 +573,11 @@
     [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
     try {
       // 서버 함수 한 번으로 전체 순서를 바꿔 중간 저장 실패를 방지합니다.
-      state.items = state.entity === "books"
-        ? await store.reorderBooks(reordered.map((row) => row.id))
-        : await store.reorderSlides(reordered.map((row) => row.id));
+      const ids = reordered.map((row) => row.id);
+      if (state.entity === "books") state.items = await store.reorderBooks(ids);
+      else if (state.entity === "faculty") state.items = await store.reorderFaculty(ids);
+      else if (state.entity === "videos") state.items = await store.reorderVideos(ids);
+      else state.items = await store.reorderSlides(ids);
       renderList();
       showToast(`${entityLabels[state.entity].singular} 순서를 변경했습니다.`);
     } catch (error) {
@@ -516,10 +596,10 @@
         return;
       }
       const actionLabels = { insert: "새로 추가", update: "수정", delete: "삭제", restore: "복구" };
-      const entityNames = { courses: "강좌", notices: "공지", slides: "슬라이드", books: "교재" };
+      const entityNames = { courses: "강좌", notices: "공지", slides: "슬라이드", books: "교재", faculty: "교수진", videos: "영상" };
       elements.historyList.innerHTML = rows.map((row) => {
         const snapshot = row.after_data || row.before_data || {};
-        const name = snapshot.title || snapshot.alt_text || "콘텐츠";
+        const name = snapshot.title || snapshot.name || snapshot.alt_text || "콘텐츠";
         return `<article class="history-item"><div><strong>${entityNames[row.entity_type]} · ${actionLabels[row.action]} · ${escapeHtml(name)}</strong><span>${formatDate(row.created_at)}</span></div><button class="admin-secondary" type="button" data-history-restore="${row.id}">이 시점으로 복구</button></article>`;
       }).join("");
     } catch (error) {
@@ -583,7 +663,7 @@
     elements.historyButton.addEventListener("click", openHistory);
     document.getElementById("helpButton").addEventListener("click", () => elements.helpDialog.showModal());
     elements.importButton.addEventListener("click", async () => {
-      if (!window.confirm("기존 내용은 그대로 두고, 등록되지 않은 기본 강좌·공지·슬라이드만 가져올까요?")) return;
+      if (!window.confirm("기존 내용은 그대로 두고, 등록되지 않은 기본 강좌·공지·슬라이드·교수진·영상을 가져올까요?")) return;
       try {
         const result = await store.importDefaults(window.GTCC_DEFAULT_CONTENT);
         showToast(`기존 내용은 유지하고 기본 데이터 ${result.total}개를 추가했습니다.`);

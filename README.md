@@ -10,7 +10,9 @@
 | 공지 등록·수정·삭제 | `/admin/`의 `공지 관리` |
 | 메인 슬라이드와 순서 | `/admin/`의 `슬라이드 관리` |
 | 추천 교재와 구매 링크 | `/admin/`의 `교재 관리` |
-| 교수진·헤더·푸터·디자인 | Git 저장소 |
+| 교수진 소개와 사진 | `/admin/`의 `교수진 관리` |
+| 온라인 강의 미리보기 | `/admin/`의 `미리보기 영상` |
+| 헤더·푸터·디자인 | Git 저장소 |
 
 - 개발자 최초 연결: [SUPABASE_SETUP.md](SUPABASE_SETUP.md)
 - 비전공자 관리자 사용법: [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
@@ -48,6 +50,7 @@ korea-kca/
 ├─ admin/index.html          관리자 로그인과 콘텐츠 관리 화면
 ├─ supabase/schema.sql       데이터 표, 보안 정책, 변경 기록, 복구 함수
 ├─ supabase/book-catalog-migration.sql  기존 프로젝트용 교재 기능 추가 SQL
+├─ supabase/faculty-video-migration.sql 기존 프로젝트용 교수진·영상 기능 추가 SQL
 ├─ SUPABASE_SETUP.md         개발자용 최초 연결 방법
 ├─ ADMIN_GUIDE.md            비전공자용 한 장 사용법
 └─ README.md
@@ -55,7 +58,7 @@ korea-kca/
 
 ## 콘텐츠 수정
 
-Supabase 연결 후에는 아래의 강좌, 해시태그, 공지, 슬라이드, 교재 수정을 코드로 하지 않습니다. `/admin/`에서 저장하면 메인 페이지, 목록, 필터와 상세 페이지에 함께 반영됩니다.
+Supabase 연결 후에는 강좌, 해시태그, 공지, 슬라이드, 교재, 교수진과 미리보기 영상을 코드로 수정하지 않습니다. `/admin/`에서 저장하면 메인 페이지, 목록, 필터와 상세 페이지에 함께 반영됩니다.
 
 이후 항목은 Supabase 장애 시 표시할 **저장소 기본 콘텐츠를 개발자가 직접 바꿔야 할 때만** 참고합니다.
 
@@ -219,25 +222,7 @@ const noticeRows = [
 https://youtu.be/Oo6xlkKzxZs?si=qvtTxjG4yzF0VmPB
 ```
 
-영상을 바꾸려면 YouTube 주소에서 영상 ID를 확인합니다. `youtu.be/` 바로 뒤 또는 일반 YouTube 주소의 `v=` 뒤에 있는 11자리 값입니다.
-
-```text
-https://youtu.be/Oo6xlkKzxZs
-                  └ 영상 ID: Oo6xlkKzxZs
-```
-
-`index.html`의 `lecture-preview`에서 아래 두 곳에 같은 영상 ID를 입력합니다.
-
-```html
-<div class="lecture-preview" data-youtube-preview data-video-id="Oo6xlkKzxZs">
-  <img src="https://i.ytimg.com/vi/Oo6xlkKzxZs/hqdefault.jpg" alt="온라인 강의 미리보기" />
-</div>
-```
-
-- `data-video-id`: 재생 버튼을 눌렀을 때 카드 안에서 열리는 영상
-- 썸네일 주소의 `/vi/영상ID/`: 재생 전 카드에 표시되는 대표 이미지
-- 두 값이 다르면 썸네일과 실제 재생 영상이 서로 달라지므로 반드시 함께 수정합니다.
-- 수정 후 메인 페이지에서 썸네일 로딩과 인라인 재생을 모두 확인합니다.
+운영 중인 사이트의 영상은 `/admin/` → `미리보기 영상` → `수정`에서 YouTube 공유 주소를 붙여 넣어 변경합니다. 영상 ID를 따로 찾거나 HTML을 수정할 필요가 없습니다.
 
 ## 하위 페이지 추가 및 수정
 

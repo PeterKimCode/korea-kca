@@ -1030,6 +1030,106 @@ body {
   transform: none;
 }
 
+/* 관리자에서 추가한 교수진의 전체 목록과 상세 소개 화면입니다. */
+.faculty-directory {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.faculty-directory-card {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.faculty-directory-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.faculty-directory-card > div {
+  padding: 24px;
+}
+
+.faculty-directory-card span,
+.faculty-directory-card strong {
+  color: var(--wine);
+  font-weight: 800;
+}
+
+.faculty-directory-card h2 {
+  margin: 8px 0 12px;
+}
+
+.faculty-directory-card p {
+  min-height: 4.8em;
+  margin: 0 0 20px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.faculty-profile {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  align-items: stretch;
+  gap: 40px;
+}
+
+.faculty-profile figure {
+  min-height: 520px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.faculty-profile figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.faculty-profile article {
+  min-width: 0;
+  padding: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.faculty-profile h2 {
+  margin: 12px 0 20px;
+}
+
+.faculty-specialties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.faculty-specialties span {
+  padding: 7px 12px;
+  color: var(--wine);
+  font-weight: 700;
+  background: #fff5f7;
+  border: 1px solid #f0d7dd;
+  border-radius: 999px;
+}
+
+.faculty-bio {
+  margin-bottom: 32px;
+  color: var(--muted);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
 .book-section {
   padding-top: 64px;
   padding-bottom: 72px;
@@ -2530,6 +2630,23 @@ body {
 
 /* ===== 모바일 반응형 ===== */
 @media (max-width: 620px) {
+  .faculty-directory,
+  .faculty-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .faculty-profile {
+    gap: 18px;
+  }
+
+  .faculty-profile figure {
+    min-height: 380px;
+  }
+
+  .faculty-profile article {
+    padding: 28px 22px;
+  }
+
   .header-top,
   .main-nav,
   .hero-section,

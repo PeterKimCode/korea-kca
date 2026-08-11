@@ -907,13 +907,49 @@ body {
   padding: 78px 0;
 }
 
+.faculty-section > * {
+  min-width: 0;
+}
+
 .teacher-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 16px;
+  min-width: 0;
+  padding: 2px 2px 12px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: #bec9d8 transparent;
+  -webkit-user-select: none;
+}
+
+.teacher-list.is-grabbing {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.teacher-list::-webkit-scrollbar {
+  height: 7px;
+}
+
+.teacher-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #bec9d8;
+}
+
+.teacher-list:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 5px;
 }
 
 .teacher-card {
+  flex: 0 0 calc((100% - 32px) / 3);
+  min-width: 150px;
   overflow: hidden;
   border: 1px solid #e0e7f1;
   border-radius: 14px;
@@ -923,6 +959,7 @@ body {
     border-color var(--motion-base) ease,
     box-shadow var(--motion-base) var(--ease-premium),
     transform var(--motion-base) var(--ease-premium);
+  scroll-snap-align: start;
 }
 
 .teacher-card img {
@@ -2680,13 +2717,16 @@ body {
   }
 
   .benefit-grid,
-  .teacher-list,
   .catalog-grid,
   .benefit-list,
   .news-grid,
   .support-grid,
   .course-info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .teacher-card {
+    flex-basis: min(68vw, 210px);
   }
 
   .book-card {

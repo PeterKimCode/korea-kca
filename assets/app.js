@@ -425,12 +425,18 @@ function renderFacultyAndVideo() {
   const facultyList = document.querySelector("[data-faculty-list]");
   if (facultyList) {
     facultyList.innerHTML = faculty.map((person) => `
-      <a class="teacher-card" href="page.html?page=instructor-${encodeURIComponent(person.slug)}">
+      <a class="teacher-card" href="page.html?page=instructor-${encodeURIComponent(person.slug)}" draggable="false">
         <img src="${escapeHtml(courseImageUrl(person.image_url, 480))}" alt="${escapeHtml(person.name)}" loading="lazy" />
         <strong>${escapeHtml(person.name)}</strong>
         <span>${escapeHtml(person.role || person.specialties || "전문 교수진")}</span>
       </a>
     `).join("");
+    enableDragScroll(facultyList);
+    facultyList.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      facultyList.scrollBy({ left: event.key === "ArrowRight" ? 190 : -190, behavior: "smooth" });
+    });
   }
 
   const preview = document.querySelector("[data-youtube-preview]");
